@@ -13,8 +13,9 @@ import net.darkslave.util.StringParser;
 
 
 
+
 /**
- * Класс-контейнер для представления строковых значений
+ *  Класс-контейнер для представления строковых значений
  */
 abstract public class StringPresenter {
 
@@ -27,8 +28,18 @@ abstract public class StringPresenter {
     }
 
 
+    public Boolean getBoolean() {
+        return getBoolean(null);
+    }
+
+
     public Integer getInteger(Integer value) {
         return StringParser.toInteger(getValue(), value);
+    }
+
+
+    public Integer getInteger() {
+        return getInteger(null);
     }
 
 
@@ -37,8 +48,18 @@ abstract public class StringPresenter {
     }
 
 
+    public Long getLong() {
+        return getLong(null);
+    }
+
+
     public Double getDouble(Double value) {
         return StringParser.toDouble(getValue(), value);
+    }
+
+
+    public Double getDouble() {
+        return getDouble(null);
     }
 
 
@@ -47,14 +68,29 @@ abstract public class StringPresenter {
     }
 
 
+    public Date getDate(DateFormat format) {
+        return getDate(null, format);
+    }
+
+
     public Date getDate(Date value, String format) {
         return StringParser.toDate(getValue(), value, format);
+    }
+
+
+    public Date getDate(String format) {
+        return getDate(null, format);
     }
 
 
     public String getString(String value) {
         String param = getValue();
         return param != null ? param : value;
+    }
+
+
+    public String getString() {
+        return getValue();
     }
 
 
