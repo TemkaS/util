@@ -6,6 +6,7 @@ package net.darkslave.util;
 
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.*;
 
 
@@ -40,7 +41,7 @@ public class Regexp {
 
 
     public static String[] match(String pattern, String source) {
-        return match(Pattern.compile(pattern), source);
+        return match(get(pattern), source);
     }
 
 
@@ -71,7 +72,29 @@ public class Regexp {
 
 
     public static List<String[]> matchAll(String pattern, String source) {
-        return matchAll(Pattern.compile(pattern), source);
+        return matchAll(get(pattern), source);
+    }
+
+
+    private static final Map<String, Pattern> cache = new ConcurrentHashMap<String, Pattern>();
+
+
+    /**
+     * @desc Получить компилированный объект рег.выражения из кеша
+     *
+     * @param source - строка рег. выражения
+     * @return скопмилированный объект рег.выражения
+     */
+    public static Pattern get(String source) {
+        Pattern cached = cache.get(source);
+
+        if (cached != null)
+            return cached;
+
+        final Pattern result = Pattern.compile(source);
+
+        cache.put(source, result);
+        return result;
     }
 
 
