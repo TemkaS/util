@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
@@ -38,6 +40,14 @@ public class SSLFactory {
     private volatile SSLContext context;
 
 
+    /**
+     * Конструктор фабрики SSL сокетов
+     *
+     * @param proto - протокол SSL
+     * @param keys  - менеджер ключей
+     * @param trust - менеджер доверенных хостов
+     * @param hosts - менеджер проверки хостов
+     */
     public SSLFactory(String proto, KeyManager[] keys, TrustManager[] trust, HostnameVerifier hosts) {
         this.proto = proto;
         this.keys  = keys;
@@ -85,43 +95,33 @@ public class SSLFactory {
 
 
     /**
-     * Создать HTTPS соединение
+     * Создать http(s) соединение
      */
-    public HttpURLConnection createConnection(URL url) throws IOException, GeneralSecurityException {
-        HttpURLConnection result = (HttpURLConnection) url.openConnection();
+    public HttpURLConnection createConnection(URL u) throws IOException, GeneralSecurityException {
+        URLConnection temp = u.openConnection();
 
-        if (result instanceof HttpsURLConnection) {
-            HttpsURLConnection https = (HttpsURLConnection) result;
+        if (!(temp instanceof HttpURLConnection))
+            throw new MalformedURLException("Protocol `" + u.getProtocol() + "` is not supported");
+
+        HttpURLConnection http = (HttpURLConnection) temp;
+
+        if (http instanceof HttpsURLConnection) {
+            HttpsURLConnection https = (HttpsURLConnection) http;
             https.setSSLSocketFactory(getSocketFactory());
             https.setHostnameVerifier(hosts);
         }
 
-        return result;
+        return http;
     }
 
 
-    public static final TrustManager[] DEFAULT_TRUST_MANAGER = new TrustManager[] {
-        new X509TrustManager() {
-            @Override
-            public X509Certificate[] getAcceptedIssuers() {
-                return new X509Certificate[0];
-            }
-            @Override
-            public void checkClientTrusted(X509Certificate[] certs, String authType) {
-            }
-            @Override
-            public void checkServerTrusted(X509Certificate[] certs, String authType) {
-            }
-        }
-    };
+    /**
+     * Создать http(s) соединение
+     */
+    public HttpURLConnection createConnection(String path) throws IOException, GeneralSecurityException {
+        return createConnection(new URL(path));
+    }
 
-
-    public static final HostnameVerifier DEFAULT_HOST_VERIFIER = new HostnameVerifier() {
-        @Override
-        public boolean verify(String hostname, SSLSession session) {
-            return true;
-        }
-    };
 
 
     /**
@@ -144,5 +144,42 @@ public class SSLFactory {
         factory.init(storage, password.toCharArray());
         return factory.getKeyManagers();
     }
+
+
+    /**
+     * Менеджер доверенных хостов по умолчанию
+     */
+    public static final TrustManager[] DEFAULT_TRUST_MANAGER = new TrustManager[] {
+        new X509TrustManager() {
+            @Override
+            public X509Certificate[] getAcceptedIssuers() {
+                return new X509Certificate[0];
+            }
+            @Override
+            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+            }
+            @Override
+            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+            }
+        }
+    };
+
+
+    /**
+     * Менеджер проверки хостов по умолчанию
+     */
+    public static final HostnameVerifier DEFAULT_HOST_VERIFIER = new HostnameVerifier() {
+        @Override
+        public boolean verify(String hostname, SSLSession session) {
+            return true;
+        }
+    };
+
+
+    /**
+     * Фабрика сокетов по умолчанию
+     */
+    public static final SSLFactory DEFAULT_FACTORY = new SSLFactory("SSL", null, DEFAULT_TRUST_MANAGER, DEFAULT_HOST_VERIFIER);
+
 
 }
