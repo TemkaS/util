@@ -16,7 +16,9 @@ import java.util.concurrent.ConcurrentMap;
 
 
 
-
+/**
+ * Класс-сервис для работы с датами
+ */
 public class DateService {
     private static final ConcurrentMap<String, Queue<DateFormat>> __dateformat = new ConcurrentHashMap<String, Queue<DateFormat>>();
     private static final ConcurrentMap<String, TimeZone> __timezone = new ConcurrentHashMap<String, TimeZone>();

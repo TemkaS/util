@@ -9,13 +9,11 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.regex.Pattern;
 
 import net.darkslave.objs.Entry;
 
@@ -26,6 +24,22 @@ import net.darkslave.objs.Entry;
 public class Misc {
     public static final String   EMPTY_STRING = "";
     public static final String[] EMPTY_STRING_ARRAY = new String[0];
+
+
+    private static final String  SPACE_CHARS = "\\u0000-\\u0020\\u00A0\\u1680\\u180E\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200A\\u200B\\u202F\\u205F\\u3000\\uFEFF";
+    private static final Pattern TRIM_SPACES = Pattern.compile("^[" + SPACE_CHARS + "]+|[" + SPACE_CHARS + "]+$");
+
+
+    /**
+     * Удалить все пробельные символы из начала и конца строки
+     *
+     * @param source - исходная строка
+     * @return строка
+     */
+    public static String trim(CharSequence source) {
+        return TRIM_SPACES.matcher(source).replaceAll(EMPTY_STRING);
+    }
+
 
 
     /**
@@ -113,7 +127,7 @@ public class Misc {
         List<String> result = new ArrayList<String>(parsed.length);
 
         for (String item : parsed)
-            if (!isEmpty(item = item.trim()))
+            if (!isEmpty(item = trim(item)))
                 result.add(item);
 
         return result;
@@ -394,162 +408,6 @@ public class Misc {
             hash = 31 * hash + hashCode0(Array.get(value, index));
 
         return hash;
-    }
-
-
-
-    /**
-     * Коллекция-обертка над массивом
-     */
-    public static class ArrayCollection<T> extends ArrayIterable<T> implements Collection<T> {
-
-
-        public ArrayCollection(T[] array) {
-            super(array);
-        }
-
-
-        @Override
-        public int size() {
-            return array.length;
-        }
-
-
-        @Override
-        public boolean isEmpty() {
-            return array.length == 0;
-        }
-
-
-        @Override
-        public boolean contains(Object value) {
-            return inArray(value, array);
-        }
-
-
-        @Override
-        public boolean containsAll(Collection<?> other) {
-            for (Object value : other)
-                if (!inArray(value, array))
-                    return false;
-            return true;
-        }
-
-
-        @Override
-        public Object[] toArray() {
-            return Arrays.copyOf(array, array.length);
-        }
-
-
-        @Override
-        @SuppressWarnings("unchecked")
-        public <E> E[] toArray(E[] other) {
-            int need = array.length,
-                have = other.length;
-
-            if (need > have)
-                return (E[]) Arrays.copyOf(array, need, other.getClass());
-
-            System.arraycopy(array, 0, other, 0, need);
-
-            for (; need < have; need++)
-                other[need] = null;
-
-            return other;
-        }
-
-
-        @Override
-        public boolean add(T e) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean addAll(Collection<? extends T> c) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean remove(Object o) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean removeAll(Collection<?> c) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean retainAll(Collection<?> c) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void clear() {
-            throw new UnsupportedOperationException();
-        }
-
-    }
-
-
-    /**
-     * Коллекция-обертка над массивом
-     */
-    public static class ArrayIterable<T> implements Iterable<T> {
-        protected final T[] array;
-
-
-        public ArrayIterable(T[] array) {
-            if (array == null)
-                throw new IllegalArgumentException("Source array can't be null");
-            this.array = array;
-        }
-
-
-        @Override
-        public Iterator<T> iterator() {
-            return new ArrayIterator<T>(array);
-
-        }
-
-    }
-
-
-    /**
-     * Итератор по элементам массива
-     */
-    public static class ArrayIterator<T> implements Iterator<T> {
-        private final T[] array;
-        private int index = 0;
-
-
-        public ArrayIterator(T[] array) {
-            if (array == null)
-                throw new IllegalArgumentException("Source array can't be null");
-            this.array = array;
-        }
-
-
-        @Override
-        public boolean hasNext() {
-            return index < array.length;
-        }
-
-
-        @Override
-        public T next() {
-            if (index >= array.length)
-                throw new NoSuchElementException();
-            return array[index++];
-        }
-
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-
     }
 
 

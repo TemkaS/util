@@ -14,7 +14,7 @@ import java.util.List;
 
 
 /**
- * Интерфейс парсера строк
+ * Абстрактный класс для разбора строк
  */
 abstract public class StringParser<T> {
 

@@ -6,7 +6,9 @@ package net.darkslave.util;
 
 
 
-
+/**
+ * Класс-обертка
+ */
 public class Holder<T> {
     private final T value;
 
