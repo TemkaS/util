@@ -4,11 +4,8 @@
  */
  package net.darkslave.io;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
-import java.security.GeneralSecurityException;
-import net.darkslave.crypto.SSLFactory;
 
 
 
@@ -24,22 +21,7 @@ public class HttpLoader {
     private final HttpURLConnection connection;
 
 
-    public static HttpLoader create(SSLFactory factory, String path) throws IOException, GeneralSecurityException {
-        return create(factory.createConnection(path));
-    }
-
-
-    public static HttpLoader create(String path) throws IOException, GeneralSecurityException {
-        return create(SSLFactory.DEFAULT_FACTORY.createConnection(path));
-    }
-
-
-    public static HttpLoader create(HttpURLConnection connection) {
-        return new HttpLoader(connection);
-    }
-
-
-    private HttpLoader(HttpURLConnection connection) {
+    public HttpLoader(HttpURLConnection connection) {
         this.connection = connection;
     }
 
