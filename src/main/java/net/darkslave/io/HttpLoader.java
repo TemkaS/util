@@ -4,6 +4,9 @@
  */
  package net.darkslave.io;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 
@@ -28,6 +31,16 @@ public class HttpLoader {
 
     public void setRequestMethod(String method) throws ProtocolException {
         connection.setRequestMethod(method);
+    }
+
+
+    public void setRequest(InputStream data) throws IOException {
+        Streams.copy(data, connection.getOutputStream());
+    }
+
+
+    public void setRequest(byte[] data) throws IOException {
+        connection.getOutputStream().write(data);
     }
 
 
@@ -57,6 +70,31 @@ public class HttpLoader {
 
     }
 
+
+    public int getResponseCode() throws IOException {
+        return connection.getResponseCode();
+    }
+
+
+    private InputStream getStream() throws IOException {
+        InputStream stream;
+
+        stream = connection.getErrorStream();
+
+        if (stream != null)
+            return stream;
+
+        stream = connection.getInputStream();
+
+        return stream;
+    }
+
+
+    public byte[] getResponse() throws IOException {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        Streams.copy(getStream(), stream);
+        return stream.toByteArray();
+    }
 
 
 
