@@ -2,7 +2,7 @@
  * java utilites © darkslave.net
  * https://github.com/darkslave86/util
  */
-package net.darkslave.crypto;
+package net.darkslave.io;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -31,6 +31,8 @@ import javax.net.ssl.X509TrustManager;
 
 /**
  * Фабрика SSL сокетов
+ *
+ * thread safe
  */
 public class SSLFactory {
     private final String           proto;

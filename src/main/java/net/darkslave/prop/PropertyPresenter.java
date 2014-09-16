@@ -30,8 +30,18 @@ abstract public class PropertyPresenter {
     }
 
 
+    public Boolean getBoolean(String name) {
+        return getBoolean(name, null);
+    }
+
+
     public Integer getInteger(String name, Integer value) {
         return StringParser.toInteger(getValue(name), value);
+    }
+
+
+    public Integer getInteger(String name) {
+        return getInteger(name, null);
     }
 
 
@@ -40,8 +50,18 @@ abstract public class PropertyPresenter {
     }
 
 
+    public Long getLong(String name) {
+        return getLong(name, null);
+    }
+
+
     public Double getDouble(String name, Double value) {
         return StringParser.toDouble(getValue(name), value);
+    }
+
+
+    public Double getDouble(String name) {
+        return getDouble(name, null);
     }
 
 
@@ -50,8 +70,18 @@ abstract public class PropertyPresenter {
     }
 
 
+    public Date getDate(String name, DateFormat format) {
+        return getDate(name, null, format);
+    }
+
+
     public Date getDate(String name, Date value, String format) {
         return StringParser.toDate(getValue(name), value, format);
+    }
+
+
+    public Date getDate(String name, String format) {
+        return getDate(name, null, format);
     }
 
 
@@ -60,6 +90,10 @@ abstract public class PropertyPresenter {
         return param != null ? param : value;
     }
 
+
+    public String getString(String name) {
+        return getValue(name);
+    }
 
 
     /**

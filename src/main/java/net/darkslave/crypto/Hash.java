@@ -28,15 +28,15 @@ public class Hash {
      *
      * @param algorithm - алгоритм контрольной суммы
      * @param source    - набор источников
-     * @return hex представление контрольной суммы
+     * @return контрольная сумма
      */
-    public static String getHash(String algorithm, byte[]... source) throws NoSuchAlgorithmException {
+    public static byte[] getHash(String algorithm, byte[] ... source) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance(algorithm);
 
         for (byte[] part : source)
             digest.update(part);
 
-        return toHexString(digest.digest());
+        return digest.digest();
     }
 
 
