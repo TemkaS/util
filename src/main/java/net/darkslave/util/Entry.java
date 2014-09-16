@@ -2,7 +2,7 @@
  * java utilites © darkslave.net
  * https://github.com/darkslave86/util
  */
-package net.darkslave.objs;
+package net.darkslave.util;
 
 
 
@@ -43,16 +43,16 @@ public final class Entry<K, V> {
 
     @Override
     public int hashCode() {
-        int result = hash;
+        int temp = hash;
 
-        if (result == 0) {
-            result = 11;
-            result+= 31 * result + (key != null ? key.hashCode() : 17);
-            result+= 31 * result + (val != null ? val.hashCode() : 17);
-            hash   = result;
+        if (temp == 0) {
+            temp = 11;
+            temp+= 31 * temp + (key != null ? key.hashCode() : 17);
+            temp+= 31 * temp + (val != null ? val.hashCode() : 17);
+            hash = temp;
         }
 
-        return result;
+        return temp;
     }
 
 

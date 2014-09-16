@@ -6,7 +6,9 @@ package net.darkslave.logs;
 
 
 
-
+/**
+ * Интерфейс логгера ошибок
+ */
 public interface Logger {
 
     void info(String content);

@@ -2,13 +2,13 @@
  * java utilites © darkslave.net
  * https://github.com/darkslave86/util
  */
-package net.darkslave.objs;
+package net.darkslave.util;
 
 
 
 
-public interface Getter<T, V> {
+public interface Setter<T, V> {
 
-    V get(T source);
+    void set(T source, V value);
 
 }

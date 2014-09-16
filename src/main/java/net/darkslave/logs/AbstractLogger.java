@@ -6,7 +6,9 @@ package net.darkslave.logs;
 
 
 
-
+/**
+ * Абстрактный класс логгера ошибок
+ */
 abstract public class AbstractLogger implements Logger {
 
     @Override

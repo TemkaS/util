@@ -17,7 +17,9 @@ import java.util.Date;
 
 
 
-
+/**
+ * Примитивная реализация логгера ошибок с записью в поток
+ */
 public class SimpleLogger extends AbstractLogger implements Closeable {
     private static final String DEFAULT_FORMAT  = "yyyy-MM-dd HH:mm:ss.S";
 

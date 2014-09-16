@@ -10,7 +10,7 @@ import java.util.concurrent.locks.AbstractQueuedSynchronizer;
 
 
 /**
- * Защелка
+ * Многоразовая защелка
  */
 public class Latch {
     private final Sync sync = new Sync();
@@ -41,15 +41,14 @@ public class Latch {
 
 
     /**
-     * Проверка закрытости
+     * Проверка закрыта ли защелка
      */
     public boolean isLocked() {
         return sync.isLocked();
     }
 
 
-    /**********************************************************************************************
-     */
+
     private static final class Sync extends AbstractQueuedSynchronizer {
         private static final long serialVersionUID = 9221134429980020596L;
         private static final int FREE = 0;

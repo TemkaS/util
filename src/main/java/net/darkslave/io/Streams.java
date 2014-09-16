@@ -15,13 +15,20 @@ import java.io.Writer;
 
 
 
-
+/**
+ * Сервис чтения данных из потока
+ */
 public class Streams {
     private static final int BYTE_BUFFER_SIZE = 4096;
 
 
     /**
      * Чтение данных из потока в поток
+     *
+     * @param input  - поток-источник
+     * @param output - целевой поток
+     * @return количество скопированных байт
+     * @throws IOException
      */
     public static long copy(InputStream input, OutputStream output) throws IOException {
         byte[] temp = new byte[BYTE_BUFFER_SIZE];
@@ -43,7 +50,13 @@ public class Streams {
 
 
     /**
-     * Чтение данных из потока в поток
+     * Чтение данных из потока в поток с указанием лимита
+     *
+     * @param input  - поток-источник
+     * @param output - целевой поток
+     * @param limit  - лимит чтения
+     * @return количество скопированных байт
+     * @throws IOException
      */
     public static long copy(InputStream input, OutputStream output, long limit) throws IOException {
         if (limit <= 0)

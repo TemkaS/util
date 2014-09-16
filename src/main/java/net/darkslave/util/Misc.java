@@ -15,8 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import net.darkslave.objs.Entry;
-
 
 
 
@@ -30,11 +28,6 @@ public class Misc {
 
 
 
-
-
-    /*******************************************************************************************************************
-     * функции работы со строками
-     */
 
     /**
      * Получить строковое представление или пустую строку, если null
@@ -190,10 +183,6 @@ public class Misc {
 
 
 
-    /*******************************************************************************************************************
-     * функции работы с массивами
-     */
-
     /**
      * Разбивка строки по разделителю
      *
@@ -275,37 +264,6 @@ public class Misc {
     }
 
 
-    public static <T> List<T> sublist(List<T> source, int start, int end) {
-        int length = source.size();
-
-        if (start >= length) {
-            return source.subList(0, 0);
-
-        } else
-        if (start < 0) {
-            start+= length;
-            if (start < 0)
-                start = 0;
-        }
-
-        if (end >= length) {
-            end = length;
-
-        } else
-        if (end <= 0) {
-            end+= length;
-            if (end <= start)
-                return source.subList(0, 0);
-        }
-
-        return source.subList(start, end);
-    }
-
-
-
-    /*******************************************************************************************************************
-     * обобщенные функции
-     */
 
     /**
      * Получить первый не null элемент списка
@@ -321,20 +279,24 @@ public class Misc {
         return null;
     }
 
+
     public static <T> T notNull(T last) {
         return last;
     }
+
 
     public static <T> T notNull(T arg1, T last) {
         if (arg1 != null) return arg1;
         return last;
     }
 
+
     public static <T> T notNull(T arg1, T arg2, T last) {
         if (arg1 != null) return arg1;
         if (arg2 != null) return arg2;
         return last;
     }
+
 
     public static <T> T notNull(T arg1, T arg2, T arg3, T last) {
         if (arg1 != null) return arg1;
