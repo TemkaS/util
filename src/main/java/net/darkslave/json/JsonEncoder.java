@@ -7,26 +7,26 @@ package net.darkslave.json;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import net.darkslave.util.Misc;
 import net.darkslave.util.Reflect;
 
 
 
 
 
-public class Json2 {
+public class JsonEncoder {
 
     /**
      * Сериализация объекта в json формат
@@ -44,116 +44,10 @@ public class Json2 {
 
 
     public static void encode(Object source, Writer writer) throws JsonException, IOException {
-        new Json2(writer).encode(MARK_ROOT, source, 0);
+        new JsonEncoder(writer).encode(EMPTY_STRING, source, 0);
     }
 
 
-
-    /**********************************************************************************************
-    */
-
-    /**
-     *  Ошибка json сериализации
-     */
-    public static class JsonException extends RuntimeException {
-        private static final long serialVersionUID = 2051156110978766383L;
-
-
-        public JsonException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-
-        public JsonException(String message) {
-            super(message);
-        }
-
-
-        public JsonException(Throwable cause) {
-            super(cause);
-        }
-
-    }
-
-
-    /**
-     *  Интерфейс класса-конвертера для замены объекта сериализации
-     */
-    public static interface JsonReplacer {
-        Object replaceWith(Object source);
-    }
-
-
-    /**
-     * Интерфейс класса с заменой объекта сериализации
-     */
-    public static interface JsonReplaceable {
-        Object replaceJson();
-    }
-
-
-    /**
-     * Маркер для игнорирования сериализации поля
-     */
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    public static @interface JsonIgnore {
-    }
-
-
-    /**
-     * Пометка для указания имени свойства при сериализации поля или метода
-     */
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ ElementType.FIELD, ElementType.METHOD })
-    public static @interface JsonProperty {
-        String value();
-    }
-
-
-    /**
-     * Элемент стека сериализации
-     */
-    private static class StackElement {
-        private Object field;
-        private Object value;
-
-
-        public StackElement(Object field, Object value) {
-            this.field = field;
-            this.value = value;
-        }
-
-
-        public Object getField() {
-            return field;
-        }
-
-
-        public Object getValue() {
-            return value;
-        }
-
-
-        public void set(Object field, Object value) {
-            this.field = field;
-            this.value = value;
-        }
-
-
-        public static String fieldsPath(List<StackElement> source, int from, int till) {
-            StringBuilder result = new StringBuilder(128);
-
-            for (int index = from; index < till; index++) {
-                if (index > from)
-                    result.append("/");
-                result.append(source.get(index).getField());
-            }
-
-            return result.toString();
-        }
-
-    }
 
 
 
@@ -161,7 +55,6 @@ public class Json2 {
     */
     private static final String EMPTY_STRING = "";
 
-    private static final String MARK_ROOT = "#root";
     private static final String MARK_NULL = "null";
     private static final String ITEMS_SEP = ", ";
     private static final String ENTRY_SEP = ": ";
@@ -254,6 +147,7 @@ public class Json2 {
         '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
     };
 
+
     private static void printHex(StringBuilder result, String prefix, int value, int index) {
         result.append(prefix);
 
@@ -266,12 +160,12 @@ public class Json2 {
 
     /**********************************************************************************************
     */
-    private final List<StackElement> stack;
+    private final Stack  stack;
     private final Writer writer;
 
 
-    private Json2(Writer w) {
-        stack  = new ArrayList<StackElement>(32);
+    private JsonEncoder(Writer w) {
+        stack  = new Stack(32);
         writer = w;
     }
 
@@ -289,12 +183,6 @@ public class Json2 {
     private void encode(Object field, Object value, int level) throws JsonException, IOException {
         if (value == null) {
             write(MARK_NULL);
-            return;
-        }
-
-        if (value instanceof JsonReplaceable) {
-            JsonReplaceable target = (JsonReplaceable) value;
-            encode(field, target.replaceJson(), level);
             return;
         }
 
@@ -322,15 +210,17 @@ public class Json2 {
             return;
         }
 
-        checkRecursion(field, value, level);
+        stack.check(field, value, level);
 
-        if (value.getClass().isArray()) {
+        Class<?> clazz = value.getClass();
+
+        if (clazz.isArray()) {
             writeArray(value, level);
             return;
         }
 
         if (value instanceof Iterable) {
-            writeList(value, level);
+            writeIterable(value, level);
             return;
         }
 
@@ -339,38 +229,26 @@ public class Json2 {
             return;
         }
 
-        writeObject(value, level);
+        Serializer coder = serializers.get(clazz);
+
+        if (coder == null) {
+            final Serializer temp = coder = Serializer.create(clazz);
+            serializers.put(clazz, temp);
+        }
+
+        coder.serialize(this, field, value, level);
     }
 
 
-    private void checkRecursion(Object field, Object value, int level) throws JsonException {
-        if (level < stack.size()) {
-            stack.get(level).set(field, value);
-        } else {
-            stack.add(level, new StackElement(field, value));
-        }
-
-        for (int index = 0; index < level; index++) {
-            if (stack.get(index).getValue() == value) {
-                throw new JsonException(
-                                "Recursion found: " +
-                                StackElement.fieldsPath(stack, 0, index + 1) +
-                                " refers to subelement " +
-                                StackElement.fieldsPath(stack, index + 1, level + 1)
-                            );
-            }
-        }
-
-    }
 
 
     private void writeArray(Object value, int level) throws JsonException, IOException {
-        int length = Array.getLength(value);
-        int index  = 0;
+        int count = Array.getLength(value);
+        int index = 0;
 
         write(LIST_BEG);
 
-        while (index < length) {
+        while (index < count) {
             if (index > 0)
                 write(ITEMS_SEP);
 
@@ -382,7 +260,7 @@ public class Json2 {
     }
 
 
-    private void writeList(Object value, int level) throws JsonException, IOException {
+    private void writeIterable(Object value, int level) throws JsonException, IOException {
         int index = 0;
 
         write(LIST_BEG);
@@ -419,8 +297,143 @@ public class Json2 {
     }
 
 
-    private void writeObject(Object value, int level) throws JsonException, IOException {
+
+
+
+    /**********************************************************************************************
+    */
+    private static final Map<Class<?>, Serializer> serializers = new ConcurrentHashMap<Class<?>, Serializer>();
+
+
+
+    private static class Property {
+        private final Method method;
+        private final Field  field;
+
+        public Property(Method method) {
+            if (method == null)
+                throw new IllegalArgumentException("Method can't be null");
+            this.method = method;
+            this.field  = null;
+        }
+
+        public Property(Field field) {
+            if (field == null)
+                throw new IllegalArgumentException("Field can't be null");
+            this.field  = field;
+            this.method = null;
+        }
+
+        public Object get(Object value) throws ReflectiveOperationException {
+            if (method != null)
+                return method.invoke(value);
+
+            if (field != null)
+                return field.get(value);
+
+            return null;
+        }
+
+    }
+
+
+    private static class Serializer {
+        private final Map<String, Property> properties;
+        private final Method replaceWith;
+
+        private Serializer(Map<String, Property> properties) {
+            if (properties == null)
+                throw new IllegalArgumentException("Properties can't be null");
+            this.properties  = properties;
+            this.replaceWith = null;
+        }
+
+        private Serializer(Method replaceWith) {
+            if (replaceWith == null)
+                throw new IllegalArgumentException("Method can't be null");
+            this.replaceWith = replaceWith;
+            this.properties  = null;
+        }
+
+        public void serialize(JsonEncoder encoder, Object field, Object value, int level) throws JsonException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
+            if (replaceWith != null) {
+                try {
+                    encoder.encode(field, replaceWith.invoke(value), level);
+                } catch (IOException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new JsonException(encoder.stack.trace(level + 1) + " replaceWith error", e);
+                }
+
+            } else
+            if (properties != null) {
+                int index = 0;
+
+                encoder.writer.write(MAPS_BEG);
+
+                for (Map.Entry<String, Property> e : properties.entrySet()) {
+                    if (index > 0)
+                        encoder.writer.write(ITEMS_SEP);
+
+                    encoder.writer.write(encodeKey(e.getKey()));
+                    encoder.writer.write(ENTRY_SEP);
+
+                    encoder.encode(e.getKey(), e.getValue().get(value), level + 1);
+
+                    index++;
+                }
+
+                encoder.writer.write(MAPS_END);
+            }
+        }
+
+        public static Serializer create(Class<?> clazz) throws NoSuchMethodException, SecurityException {
+            JsonSerialize anno = clazz.getAnnotation(JsonSerialize.class);
+
+            if (anno == null) {
+
+                return null;
+            }
+
+            /**
+             * Сериализация через метод замены объекта
+             */
+            String replaceWith = anno.replaceWith();
+
+            if (!Misc.isEmpty(replaceWith)) {
+                Method method = clazz.getDeclaredMethod(replaceWith);
+                method.setAccessible(true);
+                return new Serializer(method);
+            }
+
+            JsonProperty[] properties = anno.value();
+
+            if (!Misc.isEmpty(properties)) {
+                Map<String, Property> result = new LinkedHashMap<String, Property>();
+
+                for (JsonProperty prop : properties) {
+                    String alias  = prop.value();
+                    String field  = prop.field();
+                    String method = prop.method();
+                }
+
+                return new Serializer(result);
+            }
+
+
+
+            Map<String, Field> fields = Reflect.getFields(clazz);
+
+            return null;
+        }
+
+    }
+
+
+    /*
+
         Map<String, Field> fields = Reflect.getFields(value.getClass());
+
         int index = 0;
 
         write(MAPS_BEG);
@@ -438,31 +451,89 @@ public class Json2 {
             write(ENTRY_SEP);
 
             try {
-                field.setAccessible(true);
+                field.setAccessible(true); int a = 1 / 0;
                 encode(field.getName(), field.get(value), level + 1);
-            } catch (JsonException | IOException e) {
+            } catch (IOException e) {
                 throw e;
             } catch (Exception e) {
-                throw new JsonException(value.getClass().getName() + "#" + field.getName() + " access field error", e);
+                throw new JsonException(stack.trace(level + 1, field.getName()) + " field error", e);
             }
 
             index++;
         }
 
         write(MAPS_END);
+
+
+     */
+
+
+
+    /**
+     * Вспомогательный класс стека элементов
+     */
+    private static class Stack {
+        private final List<Object[]> stack;
+
+
+        public Stack(int size) {
+            stack = new ArrayList<Object[]>(size);
+        }
+
+
+        public void check(Object field, Object value, int level) throws JsonException {
+            Object[] item = new Object[] { field, value };
+
+            if (level < stack.size()) {
+                stack.set(level, item);
+            } else {
+                stack.add(level, item);
+            }
+
+            for (int index = 0; index < level; index++) {
+                if (stack.get(index)[1] == value) {
+                    throw new JsonException(
+                            "Recursion found: " + trace(index + 1) +
+                            " refers to " + trace(level + 1)
+                        );
+                }
+            }
+
+        }
+
+        public CharSequence trace(int level) {
+            return trace(level, null);
+        }
+
+        public CharSequence trace(int level, String item) {
+            StringBuilder result = new StringBuilder(128);
+
+            int limit = level - 1,
+                index = 0;
+
+            if (limit > 0) {
+                while (index <= limit) {
+                    result.append(stack.get(index)[0]);
+
+                    if (index != limit)
+                        result.append('/');
+
+                    index++;
+                }
+            } else {
+                result.append('/');
+            }
+
+            if (item != null) {
+                if (limit > 0)
+                    result.append('/');
+                result.append(item);
+            }
+
+            return result;
+        }
+
     }
 
 
-
-
-
-    public static void main(String args[]) throws JsonException, IOException {
-        Map<Object, Object> m = new HashMap<>();
-        List<Object> l = new ArrayList<>();
-        l.add(0, 123);
-        l.add(1, m);
-        m.put("sub", l);
-
-        System.out.println(encode(m));
-    }
 }
