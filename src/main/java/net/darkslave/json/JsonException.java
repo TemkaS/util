@@ -1,3 +1,7 @@
+/**
+ * java utilites © darkslave.net
+ * https://github.com/darkslave86/util
+ */
 package net.darkslave.json;
 
 import java.io.IOException;
@@ -25,5 +29,6 @@ public class JsonException extends IOException {
     public JsonException(Throwable cause) {
         super(cause);
     }
+
 
 }

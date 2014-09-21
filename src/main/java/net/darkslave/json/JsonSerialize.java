@@ -1,3 +1,7 @@
+/**
+ * java utilites © darkslave.net
+ * https://github.com/darkslave86/util
+ */
 package net.darkslave.json;
 
 import java.lang.annotation.ElementType;

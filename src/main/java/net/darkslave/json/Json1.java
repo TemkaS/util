@@ -14,17 +14,16 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import net.darkslave.util.Reflect;
+import net.darkslave.reflect.Reflect;
 
 
 
 
 
-public class Json {
+public class Json1 {
     private static final String EMPTY_STRING = "";
     private static final String MARK_NULL = "null";
     private static final String ITEMS_SEP = ", ";
@@ -53,14 +52,14 @@ public class Json {
      */
     public static String encode(Object value) throws JsonException, IOException {
         StringWriter writer = new StringWriter();
-        Json encoder = new Json(writer);
+        Json1 encoder = new Json1(writer);
         encoder.encode(value, 0);
         return writer.toString();
     }
 
 
     public static void encode(Object value, Writer writer) throws JsonException, IOException {
-        Json encoder = new Json(writer);
+        Json1 encoder = new Json1(writer);
         encoder.encode(value, 0);
     }
 
@@ -86,18 +85,6 @@ public class Json {
      */
     public static String escape(CharSequence value) {
         return escape0(value).toString();
-    }
-
-
-
-    /**
-     * Установить конвертер содержимого переменной
-     *
-     * @param clazz - супертип
-     * @param conv  - конвертер
-     */
-    public static void setConverter(Class<?> clazz, Converter conv) {
-        ConvertHolder.set(clazz, conv);
     }
 
 
@@ -187,7 +174,7 @@ public class Json {
     private final Writer writer;
 
 
-    private Json(Writer w) {
+    private Json1(Writer w) {
         stack  = new ArrayList<Object>();
         writer = w;
     }
@@ -234,9 +221,6 @@ public class Json {
         }
 
         if (throw_json_method(value))
-            return;
-
-        if (throw_converter(value))
             return;
 
         write_object(value, level);
@@ -382,22 +366,6 @@ public class Json {
     }
 
 
-    private boolean throw_converter(Object value) throws JsonException, IOException {
-        ConvertHolder holder = ConvertHolder.get(value.getClass());
-
-        if (!holder.hasConverter())
-            return false;
-
-        try {
-            write(holder.getConverter().convert(value));
-        } catch (JsonException | IOException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new JsonException(value.getClass().getName() + " converter error", e);
-        }
-
-        return true;
-    }
 
 
 
@@ -461,80 +429,6 @@ public class Json {
 
 
 
-    /**
-     *  Интерфейс конвертера json
-     */
-    public static interface Converter {
-        CharSequence convert(Object value) throws Exception;
-    }
-
-
-    private static class ConvertHolder {
-        private static final Map<Class<?>, ConvertHolder> cache = new ConcurrentHashMap<Class<?>, ConvertHolder>();
-        private static final ConvertHolder UNDEFINED = new ConvertHolder(null, true);
-
-        private final Converter converter;
-        private final boolean  inherited;
-
-
-        private ConvertHolder(Converter c, boolean i) {
-            this.converter = c;
-            this.inherited = i;
-        }
-
-
-        public Converter getConverter() {
-            return converter;
-        }
-
-
-        public boolean hasConverter() {
-            return converter != null;
-        }
-
-
-        public boolean isInherited() {
-            return inherited;
-        }
-
-
-        public static ConvertHolder get(Class<?> clazz) {
-            ConvertHolder holder = cache.get(clazz);
-
-            if (holder == null) {
-                holder = get0(clazz);
-                cache.put(clazz, holder);
-            }
-
-            return holder;
-        }
-
-
-        private static ConvertHolder get0(Class<?> clazz) {
-            for (Class<?> type : Reflect.getSuperTypes(clazz)) {
-                ConvertHolder conv = cache.get(type);
-                if (conv != null && !conv.isInherited())
-                    return new ConvertHolder(conv.getConverter(), true);
-            }
-
-            return UNDEFINED;
-        }
-
-
-        public static void set(Class<?> clazz, Converter conv) {
-            cache.put(clazz, new ConvertHolder(conv, false));
-
-            Iterator<Map.Entry<Class<?>, ConvertHolder>> i = cache.entrySet().iterator();
-
-            while (i.hasNext()) {
-                Map.Entry<Class<?>, ConvertHolder> e = i.next();
-                if (clazz != e.getKey() && clazz.isAssignableFrom(e.getKey()) && e.getValue().isInherited())
-                    i.remove();
-            }
-
-        }
-
-    }
 
 
     /**

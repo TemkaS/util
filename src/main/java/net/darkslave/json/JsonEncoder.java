@@ -9,18 +9,19 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
+import net.darkslave.reflect.Property;
+import net.darkslave.reflect.Reflect;
 import net.darkslave.util.Misc;
-import net.darkslave.util.Reflect;
 
 
 
@@ -229,14 +230,13 @@ public class JsonEncoder {
             return;
         }
 
-        Serializer coder = serializers.get(clazz);
 
-        if (coder == null) {
-            final Serializer temp = coder = Serializer.create(clazz);
-            serializers.put(clazz, temp);
+        try {
+            getEncoder(clazz).encode(this, field, value, level);
+        } catch (ReflectiveOperationException e) {
+            throw new JsonException(e);
         }
 
-        coder.serialize(this, field, value, level);
     }
 
 
@@ -302,170 +302,157 @@ public class JsonEncoder {
 
     /**********************************************************************************************
     */
-    private static final Map<Class<?>, Serializer> serializers = new ConcurrentHashMap<Class<?>, Serializer>();
+
+    private static interface Encoder {
+        void encode(JsonEncoder encoder, Object field, Object value, int level) throws ReflectiveOperationException, IOException;
+    }
 
 
+    private static class ReplaceEncoder implements Encoder {
+        private final Method delegate;
 
-    private static class Property {
-        private final Method method;
-        private final Field  field;
-
-        public Property(Method method) {
-            if (method == null)
-                throw new IllegalArgumentException("Method can't be null");
-            this.method = method;
-            this.field  = null;
+        public ReplaceEncoder(Method delegate) {
+            if (delegate == null)
+                throw new IllegalArgumentException("Parameter can't be null");
+            this.delegate = delegate;
         }
 
-        public Property(Field field) {
-            if (field == null)
-                throw new IllegalArgumentException("Field can't be null");
-            this.field  = field;
-            this.method = null;
-        }
-
-        public Object get(Object value) throws ReflectiveOperationException {
-            if (method != null)
-                return method.invoke(value);
-
-            if (field != null)
-                return field.get(value);
-
-            return null;
+        @Override
+        public void encode(JsonEncoder encoder, Object field, Object value, int level) throws ReflectiveOperationException, IOException {
+            encoder.encode(field, delegate.invoke(value), level);
         }
 
     }
 
 
-    private static class Serializer {
+    private static class PropertyEncoder implements Encoder {
         private final Map<String, Property> properties;
-        private final Method replaceWith;
 
-        private Serializer(Map<String, Property> properties) {
+        public PropertyEncoder(Map<String, Property> properties) {
             if (properties == null)
-                throw new IllegalArgumentException("Properties can't be null");
-            this.properties  = properties;
-            this.replaceWith = null;
+                throw new IllegalArgumentException("Parameter can't be null");
+            this.properties = properties;
         }
 
-        private Serializer(Method replaceWith) {
-            if (replaceWith == null)
-                throw new IllegalArgumentException("Method can't be null");
-            this.replaceWith = replaceWith;
-            this.properties  = null;
-        }
+        @Override
+        public void encode(JsonEncoder encoder, Object field, Object value, int level) throws ReflectiveOperationException, IOException {
+            int index = 0;
 
-        public void serialize(JsonEncoder encoder, Object field, Object value, int level) throws JsonException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
-            if (replaceWith != null) {
-                try {
-                    encoder.encode(field, replaceWith.invoke(value), level);
-                } catch (IOException e) {
-                    throw e;
-                } catch (Exception e) {
-                    throw new JsonException(encoder.stack.trace(level + 1) + " replaceWith error", e);
-                }
+            encoder.writer.write(MAPS_BEG);
 
-            } else
-            if (properties != null) {
-                int index = 0;
+            for (Map.Entry<String, Property> e : properties.entrySet()) {
+                if (index > 0)
+                    encoder.writer.write(ITEMS_SEP);
 
-                encoder.writer.write(MAPS_BEG);
+                encoder.writer.write(encodeKey(e.getKey()));
+                encoder.writer.write(ENTRY_SEP);
 
-                for (Map.Entry<String, Property> e : properties.entrySet()) {
-                    if (index > 0)
-                        encoder.writer.write(ITEMS_SEP);
+                encoder.encode(e.getKey(), e.getValue().get(value), level + 1);
 
-                    encoder.writer.write(encodeKey(e.getKey()));
-                    encoder.writer.write(ENTRY_SEP);
-
-                    encoder.encode(e.getKey(), e.getValue().get(value), level + 1);
-
-                    index++;
-                }
-
-                encoder.writer.write(MAPS_END);
+                index++;
             }
+
+            encoder.writer.write(MAPS_END);
         }
 
-        public static Serializer create(Class<?> clazz) throws NoSuchMethodException, SecurityException {
+    }
+
+
+    private static final Map<Class<?>, Encoder> Encoders = new ConcurrentHashMap<Class<?>, Encoder>();
+
+
+    private static Encoder getEncoder(Class<?> clazz) throws ReflectiveOperationException {
+        final Encoder cached = Encoders.get(clazz);
+
+        if (cached != null)
+            return cached;
+
+        final Encoder result = getEncoder0(clazz);
+        Encoders.put(clazz, result);
+
+        return result;
+    }
+
+
+    private static Encoder getEncoder0(Class<?> clazz) throws ReflectiveOperationException {
+        final Class<?> origin = clazz;
+
+        while (clazz != null) {
             JsonSerialize anno = clazz.getAnnotation(JsonSerialize.class);
 
             if (anno == null) {
-
-                return null;
+                clazz = clazz.getSuperclass();
+                continue;
             }
 
-            /**
-             * Сериализация через метод замены объекта
-             */
-            String replaceWith = anno.replaceWith();
+            // указан метод замены объекта
+            String methodName = anno.replaceWith();
 
-            if (!Misc.isEmpty(replaceWith)) {
-                Method method = clazz.getDeclaredMethod(replaceWith);
+            if (!Misc.isEmpty(methodName)) {
+                Method method = clazz.getDeclaredMethod(methodName);
                 method.setAccessible(true);
-                return new Serializer(method);
+                return new ReplaceEncoder(method);
             }
 
+            // указаны поля и методы
             JsonProperty[] properties = anno.value();
 
-            if (!Misc.isEmpty(properties)) {
-                Map<String, Property> result = new LinkedHashMap<String, Property>();
+            if (Misc.isEmpty(properties))
+                throw new IllegalArgumentException(clazz + ": properties are not defined");
 
-                for (JsonProperty prop : properties) {
-                    String alias  = prop.value();
-                    String field  = prop.field();
-                    String method = prop.method();
+            Map<String, Property> result = new LinkedHashMap<String, Property>();
+
+            for (JsonProperty prop : properties) {
+                String name = prop.value();
+                String fieldName = prop.method();
+
+                if (!Misc.isEmpty(fieldName)) {
+                    Method target = clazz.getDeclaredMethod(fieldName);
+                    target.setAccessible(true);
+
+                    if (Misc.isEmpty(name))
+                        name = fieldName;
+
+                    result.put(name, Property.create(target));
+                    continue;
                 }
 
-                return new Serializer(result);
+                fieldName = prop.field();
+
+                if (Misc.isEmpty(name) && Misc.isEmpty(fieldName))
+                    continue;
+
+                if (Misc.isEmpty(name)) {
+                    name = fieldName;
+                } else {
+                    fieldName = name;
+                }
+
+                Field target = clazz.getDeclaredField(fieldName);
+                target.setAccessible(true);
+
+                result.put(name, Property.create(target));
+
             }
 
-
-
-            Map<String, Field> fields = Reflect.getFields(clazz);
-
-            return null;
+            return new PropertyEncoder(result);
         }
 
-    }
+        // используем все поля, если ничего не указано
+        Map<String, Property> result = new HashMap<String, Property>();
 
-
-    /*
-
-        Map<String, Field> fields = Reflect.getFields(value.getClass());
-
-        int index = 0;
-
-        write(MAPS_BEG);
-
-        for (Map.Entry<String, Field> entry : fields.entrySet()) {
-            Field field = entry.getValue();
+        for (Map.Entry<String, Field> e : Reflect.getFields(origin).entrySet()) {
+            Field field = e.getValue();
 
             if ((field.getModifiers() & Modifier.STATIC) != 0)
                 continue;
 
-            if (index > 0)
-                write(ITEMS_SEP);
-
-            write(encodeKey(entry.getKey()));
-            write(ENTRY_SEP);
-
-            try {
-                field.setAccessible(true); int a = 1 / 0;
-                encode(field.getName(), field.get(value), level + 1);
-            } catch (IOException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new JsonException(stack.trace(level + 1, field.getName()) + " field error", e);
-            }
-
-            index++;
+            result.put(e.getKey(), Property.create(field));
         }
 
-        write(MAPS_END);
+        return new PropertyEncoder(result);
+    }
 
-
-     */
 
 
 

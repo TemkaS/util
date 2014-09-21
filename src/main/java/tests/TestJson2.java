@@ -47,6 +47,8 @@ public class TestJson2 {
         map1.put("number", 123.45);
         map1.put("bool",   false);
         map1.put("null",   null);
+        map1.put("objA",   new A());
+        map1.put("objB",   new B());
 
         Map<Object, Object> map2 = new HashMap<>();
         map1.put("map",    map2);
@@ -54,13 +56,6 @@ public class TestJson2 {
         map2.put("string", "abcdef");
         map2.put("number", 123.45);
         map2.put("bool",   false);
-        map2.put("null",   null);
-
-        //map1.put("map",    map1);
-
-        map2.put("obj",    new A());
-
-        System.out.println("res: " + JsonEncoder.encode(new A()));
 
         System.out.println("res: " + JsonEncoder.encode(map1));
 
