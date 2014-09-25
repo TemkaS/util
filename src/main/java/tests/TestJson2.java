@@ -1,8 +1,7 @@
 package tests;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
-
 import net.darkslave.json.*;
 
 
@@ -42,7 +41,7 @@ public class TestJson2 {
 
 
     public static void main(String[] args) throws Exception {
-        Map<Object, Object> map1 = new HashMap<>();
+        Map<Object, Object> map1 = new LinkedHashMap<>();
         map1.put("string", "abcdef");
         map1.put("number", 123.45);
         map1.put("bool",   false);
@@ -50,7 +49,7 @@ public class TestJson2 {
         map1.put("objA",   new A());
         map1.put("objB",   new B());
 
-        Map<Object, Object> map2 = new HashMap<>();
+        Map<Object, Object> map2 = new LinkedHashMap<>();
         map1.put("map",    map2);
 
         map2.put("string", "abcdef");

@@ -27,24 +27,25 @@ import net.darkslave.util.Misc;
 
 
 
-public class JsonEncoder {
+public class CopyOfJsonEncoder {
 
     /**
      * Сериализация объекта в json формат
      *
      * @param source - исходный объект
      * @return сериализованную строку
+     * @throws JsonException
      * @throws IOException
      */
-    public static String encode(Object source) throws IOException {
+    public static String encode(Object source) throws JsonException, IOException {
         StringWriter writer = new StringWriter();
         encode(source, writer);
         return writer.toString();
     }
 
 
-    public static void encode(Object source, Writer writer) throws IOException {
-        new JsonEncoder(source, writer).encode();
+    public static void encode(Object source, Writer writer) throws JsonException, IOException {
+        new CopyOfJsonEncoder(writer).encode(EMPTY_STRING, source, 0);
     }
 
 
@@ -162,50 +163,36 @@ public class JsonEncoder {
     */
     private final Stack  stack;
     private final Writer writer;
-    private Object field;
-    private Object value;
-    private int level;
 
 
-    private JsonEncoder(Object v, Writer w) {
-        value  = v;
-        writer = w;
+    private CopyOfJsonEncoder(Writer w) {
         stack  = new Stack(32);
-        field  = EMPTY_STRING;
-        level  = 0;
+        writer = w;
     }
 
 
-    private void write(String source) throws IOException {
+    private void write(String source) throws JsonException, IOException {
         writer.write(source);
     }
 
 
-    private void write(Object source) throws IOException {
+    private void write(Object source) throws JsonException, IOException {
         writer.write(source.toString());
     }
 
 
-    private void encode() throws IOException {
-        encode(field, value, level);
-    }
-
-
-    private void encode(Object field, Object value, int level) throws IOException {
-        // null
+    private void encode(Object field, Object value, int level) throws JsonException, IOException {
         if (value == null) {
             write(MARK_NULL);
             return;
         }
 
-        // примитив, обертка
         if (value instanceof Boolean
                 || value instanceof Number) {
             write(value);
             return;
         }
 
-        // символ, строка
         if (value instanceof CharSequence
                 || value instanceof Character) {
             write(ENTRY_ESC);
@@ -214,7 +201,6 @@ public class JsonEncoder {
             return;
         }
 
-        // дата, календарь
         if (value instanceof Date) {
             write(((Date) value).getTime());
             return;
@@ -225,45 +211,38 @@ public class JsonEncoder {
             return;
         }
 
-        // установка текущих полей и проверка рекурсии
-        init(field, value, level);
+        stack.check(field, value, level);
 
         Class<?> clazz = value.getClass();
 
-        // массив
         if (clazz.isArray()) {
-            writeArray();
+            writeArray(value, level);
             return;
         }
 
-        // коллекция
         if (value instanceof Iterable) {
-            writeIterable();
+            writeIterable(value, level);
             return;
         }
 
-        // таблица
         if (value instanceof Map) {
-            writeMap();
+            writeMap(value, level);
             return;
         }
 
-        // прочие объекты
-        getEncoder(clazz).encode(this);
+
+        try {
+            getEncoder(clazz).encode(this, field, value, level);
+        } catch (ReflectiveOperationException e) {
+            throw new JsonException(e);
+        }
+
     }
 
 
-    private void init(Object field, Object value, int level) throws IOException {
-        stack.check(field, value, level);
-        this.field = field;
-        this.value = value;
-        this.level = level;
-    }
 
 
-
-
-    private void writeArray() throws IOException {
+    private void writeArray(Object value, int level) throws JsonException, IOException {
         int count = Array.getLength(value);
         int index = 0;
 
@@ -281,7 +260,7 @@ public class JsonEncoder {
     }
 
 
-    private void writeIterable() throws IOException {
+    private void writeIterable(Object value, int level) throws JsonException, IOException {
         int index = 0;
 
         write(LIST_BEG);
@@ -298,7 +277,7 @@ public class JsonEncoder {
     }
 
 
-    private void writeMap() throws IOException {
+    private void writeMap(Object value, int level) throws JsonException, IOException {
         int index = 0;
 
         write(MAPS_BEG);
@@ -318,45 +297,6 @@ public class JsonEncoder {
     }
 
 
-    private void encodeReplace(Method delegate) throws IOException {
-        Object result;
-
-        try {
-            result = delegate.invoke(value);
-        } catch (ReflectiveOperationException re) {
-            throw new JsonException(re);
-        }
-
-        encode(field, result, level);
-    }
-
-
-    private void encodeProperty(Map<String, Property> properties) throws IOException {
-        int index = 0;
-
-        write(MAPS_BEG);
-
-        for (Map.Entry<String, Property> e : properties.entrySet()) {
-            if (index > 0)
-                write(ITEMS_SEP);
-
-            write(encodeKey(e.getKey()));
-            write(ENTRY_SEP);
-
-            Object result;
-
-            try {
-                result = e.getValue().get(value);
-            } catch (ReflectiveOperationException re) {
-                throw new JsonException(re);
-            }
-
-            encode(e.getKey(), result, level + 1);
-            index++;
-        }
-
-        write(MAPS_END);
-    }
 
 
 
@@ -364,7 +304,7 @@ public class JsonEncoder {
     */
 
     private static interface Encoder {
-        void encode(JsonEncoder encoder) throws IOException;
+        void encode(CopyOfJsonEncoder encoder, Object field, Object value, int level) throws ReflectiveOperationException, IOException;
     }
 
 
@@ -378,8 +318,8 @@ public class JsonEncoder {
         }
 
         @Override
-        public void encode(JsonEncoder encoder) throws IOException {
-            encoder.encodeReplace(delegate);
+        public void encode(CopyOfJsonEncoder encoder, Object field, Object value, int level) throws ReflectiveOperationException, IOException {
+            encoder.encode(field, delegate.invoke(value), level);
         }
 
     }
@@ -395,8 +335,24 @@ public class JsonEncoder {
         }
 
         @Override
-        public void encode(JsonEncoder encoder) throws IOException {
-            encoder.encodeProperty(properties);
+        public void encode(CopyOfJsonEncoder encoder, Object field, Object value, int level) throws ReflectiveOperationException, IOException {
+            int index = 0;
+
+            encoder.writer.write(MAPS_BEG);
+
+            for (Map.Entry<String, Property> e : properties.entrySet()) {
+                if (index > 0)
+                    encoder.writer.write(ITEMS_SEP);
+
+                encoder.writer.write(encodeKey(e.getKey()));
+                encoder.writer.write(ENTRY_SEP);
+
+                encoder.encode(e.getKey(), e.getValue().get(value), level + 1);
+
+                index++;
+            }
+
+            encoder.writer.write(MAPS_END);
         }
 
     }
@@ -405,22 +361,16 @@ public class JsonEncoder {
     private static final Map<Class<?>, Encoder> Encoders = new ConcurrentHashMap<Class<?>, Encoder>();
 
 
-    private static Encoder getEncoder(Class<?> clazz) throws IOException {
+    private static Encoder getEncoder(Class<?> clazz) throws ReflectiveOperationException {
         final Encoder cached = Encoders.get(clazz);
 
         if (cached != null)
             return cached;
 
-        try {
-            final Encoder result = getEncoder0(clazz);
-            Encoders.put(clazz, result);
+        final Encoder result = getEncoder0(clazz);
+        Encoders.put(clazz, result);
 
-            return result;
-
-        } catch (ReflectiveOperationException e) {
-            throw new JsonException("Encoder " + clazz + " error", e);
-        }
-
+        return result;
     }
 
 

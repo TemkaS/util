@@ -123,7 +123,7 @@ abstract public class StringParser<T> {
             if (isEmpty(source))
                 return value;
 
-            return (int) Double.parseDouble(source);
+            return Integer.parseInt(clearDot(source));
 
         } catch (NumberFormatException e) {
             return value;
@@ -143,11 +143,19 @@ abstract public class StringParser<T> {
             if (isEmpty(source))
                 return value;
 
-            return (long) Double.parseDouble(source);
+            return Long.parseLong(clearDot(source));
 
         } catch (NumberFormatException e) {
             return value;
         }
+    }
+
+
+    private static String clearDot(String source) {
+        int index = source.indexOf('.');
+        if (index >= 0)
+            return source.substring(0, index);
+        return source;
     }
 
 
