@@ -2,13 +2,14 @@
  * java utilites © darkslave.net
  * https://github.com/darkslave86/util
  */
- package net.darkslave.io;
+ package net.darkslave.http;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
+import net.darkslave.io.Streams;
 
 
 

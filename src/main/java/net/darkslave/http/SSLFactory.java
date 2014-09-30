@@ -2,7 +2,7 @@
  * java utilites © darkslave.net
  * https://github.com/darkslave86/util
  */
-package net.darkslave.io;
+package net.darkslave.http;
 
 import java.io.FileInputStream;
 import java.io.IOException;
