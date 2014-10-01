@@ -89,14 +89,14 @@ public class Bytes {
         int c;
 
         while (i < length) {
-            c = fromBitChar(source.charAt(i++)) << 7;
-            c|= fromBitChar(source.charAt(i++)) << 6;
-            c|= fromBitChar(source.charAt(i++)) << 5;
-            c|= fromBitChar(source.charAt(i++)) << 4;
-            c|= fromBitChar(source.charAt(i++)) << 3;
-            c|= fromBitChar(source.charAt(i++)) << 2;
-            c|= fromBitChar(source.charAt(i++)) << 1;
-            c|= fromBitChar(source.charAt(i++));
+            c = fromBitChar(source, i++) << 7;
+            c|= fromBitChar(source, i++) << 6;
+            c|= fromBitChar(source, i++) << 5;
+            c|= fromBitChar(source, i++) << 4;
+            c|= fromBitChar(source, i++) << 3;
+            c|= fromBitChar(source, i++) << 2;
+            c|= fromBitChar(source, i++) << 1;
+            c|= fromBitChar(source, i++);
             result[j++] = (byte) c;
         }
 
@@ -104,11 +104,13 @@ public class Bytes {
     }
 
 
-    private static int fromBitChar(char c) {
+    public static int fromBitChar(String source, int index) {
+        char c = source.charAt(index);
+
         if (c == '0' || c == '1')
             return c - '0';
 
-        throw new IllegalArgumentException("Character `" + c + "` is not valid");
+        throw new IllegalArgumentException("Illegal character `" + c + "` at position " + index);
     }
 
 
@@ -131,8 +133,8 @@ public class Bytes {
         int c;
 
         while (i < length) {
-            c = fromHexChar(source.charAt(i++)) << 4;
-            c|= fromHexChar(source.charAt(i++));
+            c = fromHexChar(source, i++) << 4;
+            c|= fromHexChar(source, i++);
             result[j++] = (byte) c;
         }
 
@@ -140,7 +142,9 @@ public class Bytes {
     }
 
 
-    private static int fromHexChar(char c) {
+    public static int fromHexChar(String source, int index) {
+        char c = source.charAt(index);
+
         if (c >= '0' && c <= '9')
             return c - '0';
 
@@ -150,7 +154,7 @@ public class Bytes {
         if (c >= 'a' && c <= 'f')
             return c - 'a' + 10;
 
-        throw new IllegalArgumentException("Character `" + c + "` is not valid");
+        throw new IllegalArgumentException("Illegal character `" + c + "` at position " + index);
     }
 
 

@@ -95,7 +95,14 @@ public class Misc {
      * @return результирующую строку
      */
     public static String repeat(CharSequence source, int count) {
-        StringBuilder result = new StringBuilder();
+        if (count < 1)
+            throw new IllegalArgumentException("Repeat count " + count + " is not valid");
+
+        int length = source.length();
+        if (length == 0)
+            return EMPTY_STRING;
+
+        StringBuilder result = new StringBuilder(length * count);
 
         while (--count >= 0)
             result.append(source);
@@ -217,14 +224,16 @@ public class Misc {
      * @return набор кусков строки
      */
     public static List<String> chunk(String source, int size) {
-        List<String> result = new ArrayList<String>();
+        if (size < 1)
+            throw new IllegalArgumentException("Chunk size " + size + " is not valid");
 
-        if (isEmpty(source))
-            return result;
+        int length = source.length();
+        if (length == 0)
+            return Collections.emptyList();
 
-        int length = source.length(),
-            next = size,
-            prev = 0;
+        List<String> result = new ArrayList<String>((length / size) + 1);
+        int next = size;
+        int prev = 0;
 
         while (next < length) {
             result.add(source.substring(prev, next));
