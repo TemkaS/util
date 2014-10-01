@@ -15,7 +15,6 @@ public class TestMisc {
         System.out.println("2: " + StringParser.toLong("1111111111.222", null));
         System.out.println("3: " + StringParser.toDouble("1111111111.222", null));
 
-
     }
 
 
