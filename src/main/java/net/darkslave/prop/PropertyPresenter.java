@@ -5,7 +5,9 @@
 package net.darkslave.prop;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import net.darkslave.util.StringParser;
 
 
@@ -94,6 +96,18 @@ abstract public class PropertyPresenter {
     public String getString(String name) {
         return getValue(name);
     }
+
+
+    public List<String> isNull(String ... source) {
+        List<String> result = new ArrayList<String>(source.length);
+
+        for (String name : source)
+            if (getValue(name) == null)
+                result.add(name);
+
+        return result;
+    }
+
 
 
     /**

@@ -5,6 +5,7 @@
 package net.darkslave.reflect;
 
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -117,6 +118,19 @@ public class Reflect {
         return getMethods(clazz).get(new MethodSignature(name, args));
     }
 
+
+
+
+    public static <T> T newInstance(Class<T> parent, String className, Object ... args) throws ReflectiveOperationException {
+        Class<?> clazz = Class.forName(className);
+
+        Constructor<?>[] cons =  clazz.getConstructors();
+        if (cons.length > 1)
+            throw new UnsupportedOperationException("Constructor is ambiguous");
+
+        Object result = cons[0].newInstance(args);
+        return parent.cast(result);
+    }
 
 
 
