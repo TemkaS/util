@@ -1,4 +1,4 @@
-package tests;
+package test;
 
 import java.nio.charset.Charset;
 import net.darkslave.crypto.Bytes;
