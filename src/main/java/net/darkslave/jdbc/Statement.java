@@ -20,152 +20,152 @@ import java.util.Date;
 
 
 
-public class StatementHolder implements AutoCloseable {
-    private final PreparedStatement statement;
+public class Statement implements AutoCloseable {
+    private final PreparedStatement target;
 
 
-    public StatementHolder(PreparedStatement statement) {
-        this.statement = statement;
+    public Statement(PreparedStatement target) {
+        this.target = target;
     }
 
 
     public PreparedStatement getStatement() {
-        return statement;
+        return target;
     }
 
 
     public void setBoolean(int index, Boolean value) throws SQLException {
         if (value != null) {
-            statement.setInt(index, value ? 1 : 0);
+            target.setInt(index, value ? 1 : 0);
         } else {
-            statement.setNull(index, Types.INTEGER);
+            target.setNull(index, Types.INTEGER);
         }
     }
 
 
     public void setBoolean(int index, boolean value) throws SQLException {
-        statement.setInt(index, value ? 1 : 0);
+        target.setInt(index, value ? 1 : 0);
     }
 
 
     public void setInteger(int index, Integer value) throws SQLException {
         if (value != null) {
-            statement.setInt(index, value.intValue());
+            target.setInt(index, value.intValue());
         } else {
-            statement.setNull(index, Types.INTEGER);
+            target.setNull(index, Types.INTEGER);
         }
     }
 
 
     public void setInteger(int index, int value) throws SQLException {
-        statement.setInt(index, value);
+        target.setInt(index, value);
     }
 
 
     public void setLong(int index, Long value) throws SQLException {
         if (value != null) {
-            statement.setLong(index, value.longValue());
+            target.setLong(index, value.longValue());
         } else {
-            statement.setNull(index, Types.BIGINT);
+            target.setNull(index, Types.BIGINT);
         }
     }
 
 
     public void setLong(int index, long value) throws SQLException {
-        statement.setLong(index, value);
+        target.setLong(index, value);
     }
 
 
     public void setDouble(int index, Double value) throws SQLException {
         if (value != null) {
-            statement.setDouble(index, value.doubleValue());
+            target.setDouble(index, value.doubleValue());
         } else {
-            statement.setNull(index, Types.DOUBLE);
+            target.setNull(index, Types.DOUBLE);
         }
     }
 
 
     public void setDouble(int index, double value) throws SQLException {
-        statement.setDouble(index, value);
+        target.setDouble(index, value);
     }
 
 
     public void setDate(int index, Date value) throws SQLException {
         if (value != null) {
-            statement.setTimestamp(index, new Timestamp(value.getTime()));
+            target.setTimestamp(index, new Timestamp(value.getTime()));
         } else {
-            statement.setNull(index, Types.TIMESTAMP);
+            target.setNull(index, Types.TIMESTAMP);
         }
     }
 
 
     public void setBigDecimal(int index, BigDecimal value) throws SQLException {
         if (value != null) {
-            statement.setBigDecimal(index, value);
+            target.setBigDecimal(index, value);
         } else {
-            statement.setNull(index, Types.NUMERIC);
+            target.setNull(index, Types.NUMERIC);
         }
     }
 
 
     public void setString(int index, String value) throws SQLException {
         if (value != null) {
-            statement.setString(index, value);
+            target.setString(index, value);
         } else {
-            statement.setNull(index, Types.VARCHAR);
+            target.setNull(index, Types.VARCHAR);
         }
     }
 
 
     public void setArray(int index, Array value) throws SQLException {
         if (value != null) {
-            statement.setArray(index, value);
+            target.setArray(index, value);
         } else {
-            statement.setNull(index, Types.ARRAY);
+            target.setNull(index, Types.ARRAY);
         }
     }
 
 
     public void setStruct(int index, Struct value) throws SQLException {
         if (value != null) {
-            statement.setObject(index, value, Types.STRUCT);
+            target.setObject(index, value, Types.STRUCT);
         } else {
-            statement.setNull(index, Types.STRUCT);
+            target.setNull(index, Types.STRUCT);
         }
     }
 
 
     public void setClob(int index, Clob value) throws SQLException {
         if (value != null) {
-            statement.setClob(index, value);
+            target.setClob(index, value);
         } else {
-            statement.setNull(index, Types.CLOB);
+            target.setNull(index, Types.CLOB);
         }
     }
 
 
     public void setBlob(int index, Blob value) throws SQLException {
         if (value != null) {
-            statement.setBlob(index, value);
+            target.setBlob(index, value);
         } else {
-            statement.setNull(index, Types.BLOB);
+            target.setNull(index, Types.BLOB);
         }
     }
 
 
-    public ResultSetHolder executeQuery() throws SQLException {
-        return new ResultSetHolder(statement.executeQuery());
+    public ResultSet executeQuery() throws SQLException {
+        return new ResultSet(target.executeQuery());
     }
 
 
     public int executeUpdate() throws SQLException {
-        return statement.executeUpdate();
+        return target.executeUpdate();
     }
 
 
     @Override
     public void close() throws SQLException  {
-        statement.close();
+        target.close();
     }
 
 }

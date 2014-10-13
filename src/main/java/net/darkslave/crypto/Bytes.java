@@ -1,6 +1,7 @@
 package net.darkslave.crypto;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 
 
 
@@ -161,7 +162,7 @@ public class Bytes {
     /**
      * Преобразование строки в набор байт
      */
-    public static byte[] from(String source, String charset) throws UnsupportedEncodingException {
+    public static byte[] from(String source, Charset charset) throws UnsupportedEncodingException {
         return source != null ? source.getBytes(charset) : EMPTY_BYTES;
     }
 

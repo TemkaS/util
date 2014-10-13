@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -22,12 +23,12 @@ public class PropertyFilePresenter extends NamedPropertyPresenter {
     private volatile Set<String> names;
 
 
-    public PropertyFilePresenter(String path, String charset) throws IOException {
+    public PropertyFilePresenter(String path, Charset charset) throws IOException {
         this(new FileInputStream(path), charset);
     }
 
 
-    public PropertyFilePresenter(InputStream stream, String charset) throws IOException {
+    public PropertyFilePresenter(InputStream stream, Charset charset) throws IOException {
         properties = new Properties();
 
         try (Reader reader = new InputStreamReader(stream, charset)) {

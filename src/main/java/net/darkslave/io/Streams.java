@@ -19,7 +19,7 @@ import java.io.Writer;
  * Сервис чтения данных из потока
  */
 public class Streams {
-    private static final int BYTE_BUFFER_SIZE = 4096;
+    private static final int BYTE_BUFFER_SIZE = 16 * 1024;
 
 
     /**
@@ -114,7 +114,7 @@ public class Streams {
 
 
 
-    private static final int CHAR_BUFFER_SIZE = 2048;
+    private static final int CHAR_BUFFER_SIZE = 8 * 1024;
 
 
     /**
