@@ -23,6 +23,7 @@ public class PropertyFilePresenter extends NamedPropertyPresenter {
     private volatile Set<String> names;
 
 
+    @SuppressWarnings("resource")
     public PropertyFilePresenter(String path, Charset charset) throws IOException {
         this(new FileInputStream(path), charset);
     }

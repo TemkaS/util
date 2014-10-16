@@ -43,6 +43,7 @@ public class SimpleLogger extends AbstractLogger implements Closeable {
     }
 
 
+    @SuppressWarnings("resource")
     public SimpleLogger(String filename, String charset, boolean append) throws IOException {
         this(new FileOutputStream(filename, append), charset);
     }
