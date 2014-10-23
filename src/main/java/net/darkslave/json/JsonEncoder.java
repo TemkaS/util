@@ -5,7 +5,6 @@
 package net.darkslave.json;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -19,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import net.darkslave.io.StringWriter;
 import net.darkslave.reflect.Property;
 import net.darkslave.reflect.Reflect;
 import net.darkslave.util.Misc;
@@ -36,15 +36,16 @@ public class JsonEncoder {
      * @return сериализованную строку
      * @throws IOException
      */
+    @SuppressWarnings("resource")
     public static String encode(Object source) throws IOException {
-        StringWriter writer = new StringWriter();
+        StringWriter writer = new StringWriter(512);
         encode(source, writer);
         return writer.toString();
     }
 
 
     public static void encode(Object source, Writer writer) throws IOException {
-        new JsonEncoder(source, writer).encode();
+        new JsonEncoder(writer).encode(source, 0);
     }
 
 
@@ -160,19 +161,27 @@ public class JsonEncoder {
 
     /**********************************************************************************************
     */
-    private final Stack  stack;
+    private final List<Object> stack;
     private final Writer writer;
-    private Object field;
-    private Object value;
-    private int level;
 
 
-    private JsonEncoder(Object v, Writer w) {
-        value  = v;
+    private JsonEncoder(Writer w) {
+        stack  = new ArrayList<Object>(32);
         writer = w;
-        stack  = new Stack(32);
-        field  = EMPTY_STRING;
-        level  = 0;
+    }
+
+
+    private void check(Object value, int level) throws JsonException {
+        if (level < stack.size()) {
+            stack.set(level, value);
+        } else {
+            stack.add(level, value);
+        }
+
+        for (int index = 0; index < level; index++)
+            if (stack.get(index) == value)
+                throw new JsonException("Recursion found");
+
     }
 
 
@@ -186,26 +195,21 @@ public class JsonEncoder {
     }
 
 
-    private void encode() throws IOException {
-        encode(field, value, level);
-    }
-
-
-    private void encode(Object field, Object value, int level) throws IOException {
+    private void encode(Object value, int level) throws IOException {
         // null
         if (value == null) {
             write(MARK_NULL);
             return;
         }
 
-        // примитив, обертка
+        // примитивы и обертки примитивов
         if (value instanceof Boolean
                 || value instanceof Number) {
             write(value);
             return;
         }
 
-        // символ, строка
+        // символы и строки
         if (value instanceof CharSequence
                 || value instanceof Character) {
             write(ENTRY_ESC);
@@ -214,56 +218,47 @@ public class JsonEncoder {
             return;
         }
 
-        // дата, календарь
+        // дата
         if (value instanceof Date) {
             write(((Date) value).getTime());
             return;
         }
 
+        // календарь
         if (value instanceof Calendar) {
             write(((Calendar) value).getTimeInMillis());
             return;
         }
 
-        // установка текущих полей и проверка рекурсии
-        init(field, value, level);
+        // проверка рекурсии
+        check(value, level);
 
         Class<?> clazz = value.getClass();
 
         // массив
         if (clazz.isArray()) {
-            writeArray();
+            writeArray(value, level);
             return;
         }
 
         // коллекция
         if (value instanceof Iterable) {
-            writeIterable();
+            writeIterable(value, level);
             return;
         }
 
         // таблица
         if (value instanceof Map) {
-            writeMap();
+            writeMap(value, level);
             return;
         }
 
         // прочие объекты
-        getEncoder(clazz).encode(this);
+        getEncoder(clazz).encode(this, value, level);
     }
 
 
-    private void init(Object field, Object value, int level) throws IOException {
-        stack.check(field, value, level);
-        this.field = field;
-        this.value = value;
-        this.level = level;
-    }
-
-
-
-
-    private void writeArray() throws IOException {
+    private void writeArray(Object value, int level) throws IOException {
         int count = Array.getLength(value);
         int index = 0;
 
@@ -273,7 +268,7 @@ public class JsonEncoder {
             if (index > 0)
                 write(ITEMS_SEP);
 
-            encode(index, Array.get(value, index), level + 1);
+            encode(Array.get(value, index), level + 1);
             index++;
         }
 
@@ -281,7 +276,7 @@ public class JsonEncoder {
     }
 
 
-    private void writeIterable() throws IOException {
+    private void writeIterable(Object value, int level) throws IOException {
         int index = 0;
 
         write(LIST_BEG);
@@ -290,7 +285,7 @@ public class JsonEncoder {
             if (index > 0)
                 write(ITEMS_SEP);
 
-            encode(index, item, level + 1);
+            encode(item, level + 1);
             index++;
         }
 
@@ -298,7 +293,7 @@ public class JsonEncoder {
     }
 
 
-    private void writeMap() throws IOException {
+    private void writeMap(Object value, int level) throws IOException {
         int index = 0;
 
         write(MAPS_BEG);
@@ -310,7 +305,7 @@ public class JsonEncoder {
             write(encodeKey(entry.getKey()));
             write(ENTRY_SEP);
 
-            encode(entry.getKey(), entry.getValue(), level + 1);
+            encode(entry.getValue(), level + 1);
             index++;
         }
 
@@ -318,7 +313,7 @@ public class JsonEncoder {
     }
 
 
-    private void encodeReplace(Method delegate) throws IOException {
+    private void encodeReplace(Method delegate, Object value, int level) throws IOException {
         Object result;
 
         try {
@@ -327,31 +322,31 @@ public class JsonEncoder {
             throw new JsonException(re);
         }
 
-        encode(field, result, level);
+        encode(result, level);
     }
 
 
-    private void encodeProperty(Map<String, Property> properties) throws IOException {
+    private void encodeProperty(Map<String, Property> properties, Object value, int level) throws IOException {
         int index = 0;
 
         write(MAPS_BEG);
 
-        for (Map.Entry<String, Property> e : properties.entrySet()) {
+        for (Map.Entry<String, Property> entry : properties.entrySet()) {
             if (index > 0)
                 write(ITEMS_SEP);
 
-            write(encodeKey(e.getKey()));
+            write(encodeKey(entry.getKey()));
             write(ENTRY_SEP);
 
             Object result;
 
             try {
-                result = e.getValue().get(value);
+                result = entry.getValue().get(value);
             } catch (ReflectiveOperationException re) {
                 throw new JsonException(re);
             }
 
-            encode(e.getKey(), result, level + 1);
+            encode(result, level + 1);
             index++;
         }
 
@@ -364,7 +359,7 @@ public class JsonEncoder {
     */
 
     private static interface Encoder {
-        void encode(JsonEncoder encoder) throws IOException;
+        void encode(JsonEncoder encoder, Object value, int level) throws IOException;
     }
 
 
@@ -378,8 +373,8 @@ public class JsonEncoder {
         }
 
         @Override
-        public void encode(JsonEncoder encoder) throws IOException {
-            encoder.encodeReplace(delegate);
+        public void encode(JsonEncoder encoder, Object value, int level) throws IOException {
+            encoder.encodeReplace(delegate, value, level);
         }
 
     }
@@ -395,8 +390,8 @@ public class JsonEncoder {
         }
 
         @Override
-        public void encode(JsonEncoder encoder) throws IOException {
-            encoder.encodeProperty(properties);
+        public void encode(JsonEncoder encoder, Object value, int level) throws IOException {
+            encoder.encodeProperty(properties, value, level);
         }
 
     }
@@ -405,7 +400,7 @@ public class JsonEncoder {
     private static final Map<Class<?>, Encoder> Encoders = new ConcurrentHashMap<Class<?>, Encoder>();
 
 
-    private static Encoder getEncoder(Class<?> clazz) throws IOException {
+    private static Encoder getEncoder(Class<?> clazz) throws JsonException {
         final Encoder cached = Encoders.get(clazz);
 
         if (cached != null)
@@ -418,9 +413,8 @@ public class JsonEncoder {
             return result;
 
         } catch (ReflectiveOperationException e) {
-            throw new JsonException("Encoder " + clazz + " error", e);
+            throw new JsonException("Get encoder " + clazz + " error", e);
         }
-
     }
 
 
@@ -447,7 +441,7 @@ public class JsonEncoder {
             JsonProperty[] properties = anno.value();
 
             if (Misc.isEmpty(properties))
-                throw new IllegalArgumentException(clazz + ": properties are not defined");
+                throw new ReflectiveOperationException("JsonProperty list is not defined");
 
             Map<String, Property> result = new LinkedHashMap<String, Property>();
 
@@ -483,7 +477,7 @@ public class JsonEncoder {
             return new PropertyEncoder(result);
         }
 
-        // если ничего не указано: сериализуем все не статичные поля объекта
+        // если ничего не указано, сериализуем все не статичные поля объекта
         Map<String, Property> result = new HashMap<String, Property>();
 
         for (Map.Entry<String, Field> e : Reflect.getFields(origin).entrySet()) {
@@ -499,73 +493,6 @@ public class JsonEncoder {
     }
 
 
-
-
-    /**
-     * Вспомогательный класс стека элементов
-     */
-    private static class Stack {
-        private final List<Object[]> stack;
-
-
-        public Stack(int size) {
-            stack = new ArrayList<Object[]>(size);
-        }
-
-
-        public void check(Object field, Object value, int level) throws JsonException {
-            Object[] item = new Object[] { field, value };
-
-            if (level < stack.size()) {
-                stack.set(level, item);
-            } else {
-                stack.add(level, item);
-            }
-
-            for (int index = 0; index < level; index++) {
-                if (stack.get(index)[1] == value) {
-                    throw new JsonException(
-                            "Recursion found: " + trace(index + 1) +
-                            " refers to " + trace(level + 1)
-                        );
-                }
-            }
-
-        }
-
-        public CharSequence trace(int level) {
-            return trace(level, null);
-        }
-
-        public CharSequence trace(int level, String item) {
-            StringBuilder result = new StringBuilder(128);
-
-            int limit = level - 1,
-                index = 0;
-
-            if (limit > 0) {
-                while (index <= limit) {
-                    result.append(stack.get(index)[0]);
-
-                    if (index != limit)
-                        result.append('/');
-
-                    index++;
-                }
-            } else {
-                result.append('/');
-            }
-
-            if (item != null) {
-                if (limit > 0)
-                    result.append('/');
-                result.append(item);
-            }
-
-            return result;
-        }
-
-    }
 
 
 }

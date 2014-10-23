@@ -2,7 +2,7 @@
  * java utilites © darkslave.net
  * https://github.com/darkslave86/util
  */
-package net.darkslave.json;
+package test.json;
 
 
 import java.io.IOException;
@@ -23,7 +23,7 @@ import net.darkslave.reflect.Reflect;
 
 
 
-public class Json1 {
+public class Json {
     private static final String EMPTY_STRING = "";
     private static final String MARK_NULL = "null";
     private static final String ITEMS_SEP = ", ";
@@ -52,14 +52,14 @@ public class Json1 {
      */
     public static String encode(Object value) throws JsonException, IOException {
         StringWriter writer = new StringWriter();
-        Json1 encoder = new Json1(writer);
+        Json encoder = new Json(writer);
         encoder.encode(value, 0);
         return writer.toString();
     }
 
 
     public static void encode(Object value, Writer writer) throws JsonException, IOException {
-        Json1 encoder = new Json1(writer);
+        Json encoder = new Json(writer);
         encoder.encode(value, 0);
     }
 
@@ -174,7 +174,7 @@ public class Json1 {
     private final Writer writer;
 
 
-    private Json1(Writer w) {
+    private Json(Writer w) {
         stack  = new ArrayList<Object>();
         writer = w;
     }
