@@ -180,7 +180,7 @@ public class JsonEncoder {
 
         for (int index = 0; index < level; index++)
             if (stack.get(index) == value)
-                throw new JsonException("Recursion found");
+                throw new JsonException("Recursion found for " + value.getClass());
 
     }
 
