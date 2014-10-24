@@ -293,11 +293,11 @@ public class JsonEncoder {
     }
 
 
-    private void encodeReplace(Method delegate, Object value, int level) throws IOException {
+    private void encodeReplace(Property delegate, Object value, int level) throws IOException {
         Object result;
 
         try {
-            result = delegate.invoke(value);
+            result = delegate.get(value);
         } catch (ReflectiveOperationException re) {
             throw new JsonException("Encode " + value.getClass() + " error", re);
         }
@@ -344,9 +344,9 @@ public class JsonEncoder {
 
 
     private static class ReplaceEncoder implements Encoder {
-        private final Method delegate;
+        private final Property delegate;
 
-        public ReplaceEncoder(Method delegate) {
+        public ReplaceEncoder(Property delegate) {
             if (delegate == null)
                 throw new IllegalArgumentException("Parameter can't be null");
             this.delegate = delegate;
@@ -413,8 +413,7 @@ public class JsonEncoder {
             // указан метод замены целевого объекта сериализации
             if (!isEmpty(targetName = anno.replaceWith())) {
                 Method target = clazz.getDeclaredMethod(targetName);
-                target.setAccessible(true);
-                return new ReplaceEncoder(target);
+                return new ReplaceEncoder(Property.create(target));
             }
 
             // указаны поля и методы сериализации
@@ -431,7 +430,6 @@ public class JsonEncoder {
                 // указан метод для сериализации свойства
                 if (!isEmpty(targetName = prop.method())) {
                     Method target = clazz.getDeclaredMethod(targetName);
-                    target.setAccessible(true);
 
                     if (isEmpty(name))
                         name = targetName;
@@ -443,7 +441,6 @@ public class JsonEncoder {
                 // указано поле для сериализации свойства
                 if (!isEmpty(targetName = prop.field()) || !isEmpty(targetName = name)) {
                     Field target = clazz.getDeclaredField(targetName);
-                    target.setAccessible(true);
 
                     if (isEmpty(name))
                         name = targetName;

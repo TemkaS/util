@@ -41,6 +41,7 @@ abstract public class Property {
 
         @Override
         public Object get(Object target, Object... args) throws ReflectiveOperationException {
+            delegate.setAccessible(true);
             return delegate.get(target);
         }
 
@@ -58,6 +59,7 @@ abstract public class Property {
 
         @Override
         public Object get(Object target, Object... args) throws ReflectiveOperationException {
+            delegate.setAccessible(true);
             return delegate.invoke(target, args);
         }
 
