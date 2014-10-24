@@ -110,30 +110,11 @@ public class JsonEncoder {
 
         for (int i = 0; i < length; i++) {
             char value = temp.charAt(i);
-            if (value < ' ' || value == '\"' || value == '\\') {
-                switch (value) {
-                    case '\t':
-                        result.append("\\t");
-                    break;
-                    case '\r':
-                        result.append("\\r");
-                    break;
-                    case '\n':
-                        result.append("\\n");
-                    break;
-                    case '\f':
-                        result.append("\\f");
-                    break;
-                    case '\"':
-                        result.append("\\\"");
-                    break;
-                    case '\\':
-                        result.append("\\\\");
-                    break;
-                    default:
-                        printHex(result, "\\x", value, 8);
-                    break;
-                }
+            if (value <= 0x1f || (value >= 0x7f && value <= 0x9f)) {
+                printHex(result, "\\u", value, 16);
+            } else
+            if (value == '\"' || value == '\\') {
+                result.append('\\').append(value);
             } else {
                 result.append(value);
             }
