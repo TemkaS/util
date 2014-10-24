@@ -55,8 +55,9 @@ public class TestJson {
         map2.put("string", "abcdef");
         map2.put("number", 123.45);
         map2.put("bool",   false);
+        map2.put("map1",   map1);
 
-        System.out.println("res: " + Json.encode(map1));
+        // System.out.println("res: " + Json.encode(map1));
         System.out.println("res: " + JsonEncoder.encode(map1));
 
 

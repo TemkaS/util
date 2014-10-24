@@ -10,6 +10,11 @@ public class StringWriter extends Writer {
     private final StringBuilder target;
 
 
+    public StringWriter() {
+        this(128);
+    }
+
+
     public StringWriter(int defaultSize) {
         target = new StringBuilder(defaultSize);
     }

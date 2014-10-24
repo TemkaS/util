@@ -319,7 +319,7 @@ public class JsonEncoder {
         try {
             result = delegate.invoke(value);
         } catch (ReflectiveOperationException re) {
-            throw new JsonException(re);
+            throw new JsonException("Encode " + value.getClass() + " error", re);
         }
 
         encode(result, level);
@@ -343,7 +343,7 @@ public class JsonEncoder {
             try {
                 result = entry.getValue().get(value);
             } catch (ReflectiveOperationException re) {
-                throw new JsonException(re);
+                throw new JsonException("Encode " + value.getClass() + " error", re);
             }
 
             encode(result, level + 1);
@@ -491,8 +491,6 @@ public class JsonEncoder {
 
         return new PropertyEncoder(result);
     }
-
-
 
 
 }
