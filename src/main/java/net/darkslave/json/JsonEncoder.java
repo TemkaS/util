@@ -21,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.darkslave.io.StringWriter;
 import net.darkslave.reflect.Property;
 import net.darkslave.reflect.Reflect;
-import net.darkslave.util.Misc;
 
 
 
@@ -412,7 +411,7 @@ public class JsonEncoder {
             }
 
             // указан метод замены целевого объекта сериализации
-            if (!Misc.isEmpty(targetName = anno.replaceWith())) {
+            if (!isEmpty(targetName = anno.replaceWith())) {
                 Method target = clazz.getDeclaredMethod(targetName);
                 target.setAccessible(true);
                 return new ReplaceEncoder(target);
@@ -421,7 +420,7 @@ public class JsonEncoder {
             // указаны поля и методы сериализации
             JsonProperty[] properties = anno.value();
 
-            if (Misc.isEmpty(properties))
+            if (isEmpty(properties))
                 throw new ReflectiveOperationException("JsonProperty list is not defined");
 
             Map<String, Property> result = new LinkedHashMap<String, Property>();
@@ -430,11 +429,11 @@ public class JsonEncoder {
                 String name = prop.value();
 
                 // указан метод для сериализации свойства
-                if (!Misc.isEmpty(targetName = prop.method())) {
+                if (!isEmpty(targetName = prop.method())) {
                     Method target = clazz.getDeclaredMethod(targetName);
                     target.setAccessible(true);
 
-                    if (Misc.isEmpty(name))
+                    if (isEmpty(name))
                         name = targetName;
 
                     result.put(name, Property.create(target));
@@ -442,11 +441,11 @@ public class JsonEncoder {
                 }
 
                 // указано поле для сериализации свойства
-                if (!Misc.isEmpty(targetName = prop.field()) || !Misc.isEmpty(targetName = name)) {
+                if (!isEmpty(targetName = prop.field()) || !isEmpty(targetName = name)) {
                     Field target = clazz.getDeclaredField(targetName);
                     target.setAccessible(true);
 
-                    if (Misc.isEmpty(name))
+                    if (isEmpty(name))
                         name = targetName;
 
                     result.put(name, Property.create(target));
@@ -471,6 +470,16 @@ public class JsonEncoder {
         }
 
         return new PropertyEncoder(result);
+    }
+
+
+    private static boolean isEmpty(CharSequence source) {
+        return source == null || source.length() == 0;
+    }
+
+
+    private static boolean isEmpty(Object[] source) {
+        return source == null || source.length == 0;
     }
 
 
