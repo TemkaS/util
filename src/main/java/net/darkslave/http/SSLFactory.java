@@ -58,6 +58,11 @@ public class SSLFactory {
     }
 
 
+    public SSLFactory(String proto, KeyManager[] keys) {
+        this(proto, keys, DEFAULT_TRUST_MANAGER, DEFAULT_HOST_VERIFIER);
+    }
+
+
     private SSLContext getContext() throws GeneralSecurityException {
         if (context == null) {
             synchronized (this) {
