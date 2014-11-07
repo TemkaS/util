@@ -26,17 +26,57 @@ public class Misc {
     private static final String  SPACE_CHARS = "\\u0000-\\u0020\\u00A0\\u1680\\u180E\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200A\\u200B\\u202F\\u205F\\u3000\\uFEFF";
     private static final Pattern TRIM_SPACES = Pattern.compile("^[" + SPACE_CHARS + "]+|[" + SPACE_CHARS + "]+$");
 
+    private static final String  MARKER_BEGIN = "{{";
+    private static final String  MARKER_CLOSE = "}}";
+
+
+
+    /**
+     * Получить строку по шаблону
+     *
+     * @param source - шаблон
+     * @param params - параметры
+     * @return строка
+     */
+    public static String template(String source, Map<String, ?> params) {
+        StringBuilder result = new StringBuilder(source.length());
+        int index = 0;
+
+        while (true) {
+            int begin = source.indexOf(MARKER_BEGIN, index);
+            int close = source.indexOf(MARKER_CLOSE, begin);
+
+            if (begin < 0 || close < 0) {
+                result.append(source.substring(index));
+                break;
+            }
+
+            String key = source.substring(begin + MARKER_BEGIN.length(), close);
+            Object val = params.get(key);
+
+            if (val != null) {
+                result.append(source.substring(index, begin));
+                result.append(val);
+            } else {
+                result.append(source.substring(index, close + MARKER_CLOSE.length()));
+            }
+
+            index = close + MARKER_CLOSE.length();
+        }
+
+        return result.toString();
+    }
 
 
 
     /**
      * Получить строковое представление или пустую строку, если null
      *
-     * @param value - исходный объект
+     * @param source - исходный объект
      * @return строка
      */
-    public static String toString(Object value) {
-        return value != null ? value.toString() : EMPTY_STRING;
+    public static String toString(Object source) {
+        return source != null ? source.toString() : EMPTY_STRING;
     }
 
 

@@ -36,11 +36,13 @@ public class HttpLoader {
 
 
     public void setRequest(InputStream data) throws IOException {
+        connection.setDoOutput(true);
         Streams.copy(data, connection.getOutputStream());
     }
 
 
     public void setRequest(byte[] data) throws IOException {
+        connection.setDoOutput(true);
         connection.getOutputStream().write(data);
     }
 
