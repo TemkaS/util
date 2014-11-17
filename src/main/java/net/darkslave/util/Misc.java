@@ -28,7 +28,36 @@ public class Misc {
 
     private static final String  MARKER_BEGIN = "{{";
     private static final String  MARKER_CLOSE = "}}";
+    private static final int     MARKER_BEGIN_LENGTH = MARKER_BEGIN.length();
+    private static final int     MARKER_CLOSE_LENGTH = MARKER_CLOSE.length();
 
+
+    /**
+     * Интерфейс разборщика шаблона на основе хэш-таблицы
+     */
+    public static class MapResolver implements Resolver {
+        private final Map<?, ?> delegate;
+
+        public MapResolver(Map<?, ?> delegate) {
+            if (delegate == null)
+                throw new IllegalArgumentException("Parameter can't be null");
+            this.delegate = delegate;
+        }
+
+        @Override
+        public Object get(String key) {
+            return delegate.get(key);
+        }
+
+    }
+
+
+    /**
+     * Интерфейс разборщика шаблона
+     */
+    public static interface Resolver {
+        Object get(String key);
+    }
 
 
     /**
@@ -39,6 +68,18 @@ public class Misc {
      * @return строка
      */
     public static String template(String source, Map<String, ?> params) {
+        return template(source, new MapResolver(params));
+    }
+
+
+    /**
+     * Получить строку по шаблону
+     *
+     * @param source   - шаблон
+     * @param resolver - разборщик шаблона
+     * @return строка
+     */
+    public static String template(String source, Resolver resolver) {
         StringBuilder result = new StringBuilder(source.length());
         int index = 0;
 
@@ -51,21 +92,22 @@ public class Misc {
                 break;
             }
 
-            String key = source.substring(begin + MARKER_BEGIN.length(), close);
-            Object val = params.get(key);
+            String key = source.substring(begin + MARKER_BEGIN_LENGTH, close);
+            Object val = resolver.get(key);
 
             if (val != null) {
                 result.append(source.substring(index, begin));
                 result.append(val);
             } else {
-                result.append(source.substring(index, close + MARKER_CLOSE.length()));
+                result.append(source.substring(index, close + MARKER_CLOSE_LENGTH));
             }
 
-            index = close + MARKER_CLOSE.length();
+            index = close + MARKER_CLOSE_LENGTH;
         }
 
         return result.toString();
     }
+
 
 
 
