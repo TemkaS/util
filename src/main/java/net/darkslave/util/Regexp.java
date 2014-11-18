@@ -14,66 +14,121 @@ import java.util.regex.*;
 
 public class Regexp {
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
+    private static final String   EMPTY_STRING       = "";
+
+
+
+    public static interface Replacer {
+        Object replace(String[] match);
+    }
+
 
 
 
     /**
-     * Получить список частей строки, удовлетворяющих регулярному выражению
+     * Получить список совпадений
      *
-     * @param pattern - регулярное выражение
-     * @param source  - строка источник
-     * @return список частей
+     * @param matcher - обработчик совпадений
+     * @return список совпадений
      */
-    public static String[] match(Pattern pattern, String source) {
-        Matcher resp = pattern.matcher(source);
+    public static String[] match(Matcher matcher) {
+        int count = matcher.groupCount();
 
-        if (!resp.find())
+        String[] match = new String[count + 1];
+        for (int i = 0; i <= count; i++)
+            match[i] = matcher.group(i);
+
+        return match;
+    }
+
+
+
+    /**
+     * Получить список совпадений в строке по регулярному выражению
+     *
+     * @param source  - источник
+     * @param pattern - регулярное выражение
+     * @return список совпадений
+     */
+    public static String[] match(CharSequence source, Pattern pattern) {
+        Matcher matcher = pattern.matcher(source);
+
+        if (!matcher.find())
             return EMPTY_STRING_ARRAY;
 
-        int size = resp.groupCount();
-        String[] result = new String[size + 1];
-
-        for (int i = 0; i <= size; i++)
-            result[i] = resp.group(i);
-
-        return result;
+        return match(matcher);
     }
 
 
-    public static String[] match(String pattern, String source) {
-        return match(get(pattern), source);
+    public static String[] match(CharSequence source, String pattern) {
+        return match(source, get(pattern));
     }
 
 
 
     /**
-     * Получить все списки частей строки, удовлетвоярющих шаблону
+     * Получить все списки совпадений в строке по регулярному выражению
      *
+     * @param source  - источник
      * @param pattern - регулярное выражение
-     * @param source  - строка источник
-     * @return список списков частей
+     * @return список списков совпадений
      */
-    public static List<String[]> matchAll(Pattern pattern, String source) {
+    public static List<String[]> matchAll(CharSequence source, Pattern pattern) {
         List<String[]> result = new ArrayList<String[]>();
-        Matcher resp = pattern.matcher(source);
+        Matcher matcher = pattern.matcher(source);
 
-        while (resp.find()) {
-            int size = resp.groupCount();
-            String[] item = new String[size + 1];
-
-            for (int i = 0; i <= size; i++)
-                item[i] = resp.group(i);
-
-            result.add(item);
-        }
+        while (matcher.find())
+            result.add(match(matcher));
 
         return result;
     }
 
 
-    public static List<String[]> matchAll(String pattern, String source) {
-        return matchAll(get(pattern), source);
+    public static List<String[]> matchAll(CharSequence source, String pattern) {
+        return matchAll(source, get(pattern));
     }
+
+
+    /**
+     * Замена строки по регулярному выражению
+     *
+     * @param source   - источник
+     * @param pattern  - регулярное выражение
+     * @param replacer - функция-заменитель
+     * @return результирующую строку
+     */
+    public static String replaceAll(CharSequence source, Pattern pattern, Replacer replacer) {
+        int length = source.length();
+        if (length == 0)
+            return EMPTY_STRING;
+
+        int cursor = 0;
+
+        StringBuilder result = new StringBuilder(length + (length >>> 2));
+        Matcher matcher = pattern.matcher(source);
+
+        while (matcher.find()) {
+            int begin = matcher.start();
+
+            if (begin > cursor)
+                result.append(source, cursor, begin);
+
+            result.append(replacer.replace(match(matcher)));
+
+            cursor = matcher.end();
+        }
+
+        if (length > cursor)
+            result.append(source, cursor, length);
+
+        return result.toString();
+    }
+
+
+    public static String replaceAll(CharSequence source, String pattern, Replacer replacer) {
+        return replaceAll(source, get(pattern), replacer);
+    }
+
 
 
     private static final Map<String, Pattern> cache = new ConcurrentHashMap<String, Pattern>();
