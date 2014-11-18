@@ -141,7 +141,7 @@ public class Regexp {
      * @return скопмилированный объект рег.выражения
      */
     public static Pattern get(String source) {
-        Pattern cached = cache.get(source);
+        final Pattern cached = cache.get(source);
 
         if (cached != null)
             return cached;
