@@ -1,4 +1,4 @@
-package graphs.core;
+package graphs.axis;
 
 
 

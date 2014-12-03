@@ -1,21 +1,24 @@
-package graphs.core;
+package graphs.plot;
 
+import graphs.data.NumberData;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Stroke;
 
 
 
-public class LineDataPlot extends DataPlot {
+public class LineDataRender implements DataRender {
     public static final Stroke DEFAULT_LINE_STROKE = new BasicStroke(0.8f);
     public static final Color  DEFAULT_LINE_COLOR  = Color.black;
+
+    private final NumberData data;
 
     private Stroke lineStroke;
     private Color  lineColor;
 
 
-    public LineDataPlot(Data data) {
-        super(data);
+    public LineDataRender(NumberData data) {
+        this.data = data;
         this.lineStroke = DEFAULT_LINE_STROKE;
         this.lineColor  = DEFAULT_LINE_COLOR;
     }

@@ -1,6 +1,7 @@
-package graphs.core;
+package graphs.axis;
 
-import graphs.core.Location.Type;
+import graphs.axis.Location.Type;
+import graphs.core.Rectangle;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
@@ -17,7 +18,7 @@ public class Axis {
     public static final Stroke DEFAULT_AXIS_LINE_STROKE = new BasicStroke(0.8f);
     public static final Color  DEFAULT_AXIS_LINE_COLOR  = Color.black;
 
-    public static final Font   DEFAULT_TICK_TITLE_FONT  = new Font("Tahoma", Font.PLAIN, 10);
+    public static final Font   DEFAULT_TICK_TITLE_FONT  = new Font("Tahoma", Font.PLAIN, 8);
     public static final Color  DEFAULT_TICK_TITLE_COLOR = Color.black;
     public static final Stroke DEFAULT_TICK_LINE_STROKE = new BasicStroke(0.5f);
     public static final Color  DEFAULT_TICK_LINE_COLOR  = Color.black;
@@ -36,7 +37,6 @@ public class Axis {
     }
 
 
-    private final Name name;
     private final Type type;
 
     private String   title;
@@ -58,10 +58,9 @@ public class Axis {
     private int  axisOutset;
 
 
-    public Axis(Name name, String title, Type type) {
-        this.name  = name;
-        this.title = title;
+    public Axis(Type type, String title) {
         this.type  = type;
+        this.title = title;
 
         this.location = type.getDefaultLocation();
 
@@ -79,12 +78,6 @@ public class Axis {
         this.arrowShape   = DEFAULT_ARROW_SHAPE;
         this.arrowVisible = true;
 
-    }
-
-
-
-    public Name getName() {
-        return name;
     }
 
 

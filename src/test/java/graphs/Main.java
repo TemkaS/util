@@ -1,14 +1,14 @@
 package graphs;
 
-import graphs.core.Axis;
-import graphs.core.Data;
-import graphs.core.DataPlot;
-import graphs.core.LineDataPlot;
-import graphs.core.Location;
-import graphs.core.NumberData;
-import graphs.core.Plot;
+import graphs.axis.Axis;
+import graphs.axis.Location;
 import graphs.core.Rectangle;
 import graphs.core.StringName;
+import graphs.data.Data;
+import graphs.data.NumberData;
+import graphs.plot.DataRender;
+import graphs.plot.LineDataRender;
+import graphs.plot.Chart;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -27,7 +27,7 @@ import javax.imageio.ImageIO;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        Plot plot = new Plot();
+        Chart plot = new Chart();
         Axis axisX = new Axis(new StringName("x"), "", Location.Type.X);    axisX.setAxisLineColor(Color.red);
         Axis axisY = new Axis(new StringName("y"), "", Location.Type.Y);    axisY.setAxisLineColor(Color.blue);
         Axis axisZ = new Axis(new StringName("z"), "", Location.Type.Y);    axisZ.setAxisLineColor(Color.green);
@@ -36,11 +36,11 @@ public class Main {
         plot.setAxisX(axisX, dataX);
 
         Data dataY = new NumberData();
-        DataPlot dataPlotY = new LineDataPlot(dataY);
+        DataRender dataPlotY = new LineDataRender(dataY);
         plot.setAxisY(axisY, dataPlotY);
 
         Data dataZ = new NumberData();
-        DataPlot dataPlotZ = new LineDataPlot(dataZ);
+        DataRender dataPlotZ = new LineDataRender(dataZ);
         plot.setAxisY(axisZ, dataPlotZ);
 
 
