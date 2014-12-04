@@ -87,6 +87,16 @@ public class Rectangle implements Cloneable {
     }
 
 
+    public int getWidth() {
+        return right - left;
+    }
+
+
+    public int getHeight() {
+        return bottom - top;
+    }
+
+
     @Override
     protected Rectangle clone() {
         try {

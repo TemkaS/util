@@ -220,7 +220,7 @@ public class Axis {
     }
 
 
-    public void draw(Graphics2D g2d, Rectangle drawArea, Rectangle outset) {
+    void draw(Graphics2D g2d, Rectangle drawArea, Rectangle outset) {
         Font   prevFont   = g2d.getFont();
         Color  prevColor  = g2d.getColor();
         Stroke prevStroke = g2d.getStroke();

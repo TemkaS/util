@@ -10,4 +10,10 @@ public class TimeBase implements Base {
         return null;
     }
 
+    @Override
+    public int size() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
 }

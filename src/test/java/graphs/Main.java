@@ -2,11 +2,9 @@ package graphs;
 
 import graphs.axis.Axis;
 import graphs.axis.Location;
+import graphs.base.NumberBase;
 import graphs.core.Rectangle;
-import graphs.core.StringName;
-import graphs.data.Data;
 import graphs.data.NumberData;
-import graphs.plot.DataRender;
 import graphs.plot.LineDataRender;
 import graphs.plot.Chart;
 import java.awt.BasicStroke;
@@ -27,28 +25,22 @@ import javax.imageio.ImageIO;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        Chart plot = new Chart();
-        Axis axisX = new Axis(new StringName("x"), "", Location.Type.X);    axisX.setAxisLineColor(Color.red);
-        Axis axisY = new Axis(new StringName("y"), "", Location.Type.Y);    axisY.setAxisLineColor(Color.blue);
-        Axis axisZ = new Axis(new StringName("z"), "", Location.Type.Y);    axisZ.setAxisLineColor(Color.green);
+        Chart chart = new Chart();
+        Axis axisX = new Axis(Location.Type.X, "");  axisX.setAxisLineColor(Color.red);
+        Axis axisY = new Axis(Location.Type.Y, "");  axisY.setAxisLineColor(Color.blue);
+        Axis axisZ = new Axis(Location.Type.Y, "");  axisZ.setAxisLineColor(Color.green);
 
-        Data dataX = new NumberData();
-        plot.setAxisX(axisX, dataX);
+        chart.setBaseAxis(axisX, new NumberBase());
 
-        Data dataY = new NumberData();
-        DataRender dataPlotY = new LineDataRender(dataY);
-        plot.setAxisY(axisY, dataPlotY);
-
-        Data dataZ = new NumberData();
-        DataRender dataPlotZ = new LineDataRender(dataZ);
-        plot.setAxisY(axisZ, dataPlotZ);
+        chart.setDataAxis(axisY, new LineDataRender(new NumberData()));
+        chart.setDataAxis(axisZ, new LineDataRender(new NumberData()));
 
 
         BufferedImage image = new BufferedImage(800, 600, BufferedImage.TYPE_INT_ARGB);
         Rectangle area = new Rectangle(0, 0, 800, 600);
 
         Graphics2D g2d = image.createGraphics();
-        plot.draw(g2d, area);
+        chart.draw(g2d, area);
         g2d.dispose();
 
         ImageIO.write(image, "png", new File("d:/test.png"));

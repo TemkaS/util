@@ -1,7 +1,9 @@
 package graphs.axis;
 
 
+import java.awt.Graphics2D;
 import graphs.base.Base;
+import graphs.core.Rectangle;
 
 
 
@@ -33,4 +35,8 @@ public class AxisBase {
         return base;
     }
 
+
+    public void draw(Graphics2D g2d, Rectangle drawArea, Rectangle outset) {
+        axis.draw(g2d, drawArea, outset);
+    }
 }
