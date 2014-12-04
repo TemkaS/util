@@ -1,6 +1,7 @@
 package net.darkslave.conc;
 
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -12,8 +13,23 @@ import java.util.concurrent.TimeUnit;
  * Завершенное задание
  */
 public class CompletedFuture<T> implements Future<T> {
-    private final T value;
     private final Throwable error;
+    private final T value;
+
+
+    public CompletedFuture(Callable<T> command) {
+        Exception error = null;
+        T value = null;
+
+        try {
+            value = command.call();
+        } catch (Exception e) {
+            error = e;
+        }
+
+        this.value = value;
+        this.error = error;
+    }
 
 
     public CompletedFuture(T value, Throwable error) {
