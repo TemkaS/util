@@ -42,21 +42,12 @@ public class Chart {
         if (axisData.size() == 0)
             throw new IllegalStateException("No data axes are defined");
 
-        // проверка размерностей
-        int size = axisBase.getBase().size();
-
-        for (AxisDataRender item : axisData) {
-            for (DataRender render : item.getDataRender()) {
-                if (render.getData().size() != size)
-                    throw new IllegalStateException("Data `" + render.getData().getName() + "` has different size than other");
-            }
-        }
 
         Rectangle outset = new Rectangle();
 
         // рисуем данные
         for (AxisDataRender item : axisData)
-            item.draw(g2d, drawArea, outset);
+            item.draw(g2d, drawArea, outset, 0, 0);
 
         axisBase.draw(g2d, drawArea, outset);
 
