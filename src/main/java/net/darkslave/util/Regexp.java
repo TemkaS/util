@@ -17,6 +17,13 @@ public class Regexp {
     private static final String   EMPTY_STRING       = "";
 
 
+    public static Replacer<String> RETURN_FIRST = new Replacer<String>() {
+        @Override
+        public String replace(String[] match) {
+            return match.length > 1 ? match[1] : EMPTY_STRING;
+        }
+    };
+
 
     public static interface Replacer<T> {
         T replace(String[] match);
@@ -62,6 +69,29 @@ public class Regexp {
 
     public static String[] match(CharSequence source, String pattern) {
         return match(source, get(pattern));
+    }
+
+
+    /**
+     * Получить список совпадений в строке по регулярному выражению
+     *
+     * @param source  - источник
+     * @param pattern - регулярное выражение
+     * @param replacer - функция-заменитель
+     * @return список совпадений
+     */
+    public static <T> T match(CharSequence source, Pattern pattern, Replacer<T> replacer) {
+        Matcher matcher = pattern.matcher(source);
+
+        if (!matcher.find())
+            return replacer.replace(EMPTY_STRING_ARRAY);
+
+        return replacer.replace(match(matcher));
+    }
+
+
+    public static <T> T match(CharSequence source, String pattern, Replacer<T> replacer) {
+        return match(source, get(pattern), replacer);
     }
 
 
