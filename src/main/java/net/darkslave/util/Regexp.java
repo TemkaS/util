@@ -18,8 +18,8 @@ public class Regexp {
 
 
 
-    public static interface Replacer {
-        Object replace(String[] match);
+    public static interface Replacer<T> {
+        T replace(String[] match);
     }
 
 
@@ -90,6 +90,31 @@ public class Regexp {
 
 
     /**
+     * Получить все списки совпадений в строке по регулярному выражению
+     *
+     * @param source   - источник
+     * @param pattern  - регулярное выражение
+     * @param replacer - функция-заменитель
+     * @return список списков совпадений
+     */
+    public static <T> List<T> matchAll(CharSequence source, Pattern pattern, Replacer<T> replacer) {
+        List<T> result = new ArrayList<T>();
+        Matcher matcher = pattern.matcher(source);
+
+        while (matcher.find())
+            result.add(replacer.replace(match(matcher)));
+
+        return result;
+    }
+
+
+    public static <T> List<T> matchAll(CharSequence source, String pattern, Replacer<T> replacer) {
+        return matchAll(source, get(pattern), replacer);
+    }
+
+
+
+    /**
      * Замена строки по регулярному выражению
      *
      * @param source   - источник
@@ -97,7 +122,7 @@ public class Regexp {
      * @param replacer - функция-заменитель
      * @return результирующую строку
      */
-    public static String replaceAll(CharSequence source, Pattern pattern, Replacer replacer) {
+    public static String replaceAll(CharSequence source, Pattern pattern, Replacer<?> replacer) {
         int length = source.length();
         if (length == 0)
             return EMPTY_STRING;
@@ -125,7 +150,7 @@ public class Regexp {
     }
 
 
-    public static String replaceAll(CharSequence source, String pattern, Replacer replacer) {
+    public static String replaceAll(CharSequence source, String pattern, Replacer<?> replacer) {
         return replaceAll(source, get(pattern), replacer);
     }
 
