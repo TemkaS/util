@@ -339,7 +339,7 @@ public class Misc {
      * @return
      */
     @SafeVarargs
-    public static <T> boolean inArray(Object value, T ... array) {
+    public static <T> boolean inArray(T value, T ... array) {
 
         if (value != null) {
             for (T item : array)
