@@ -23,7 +23,7 @@ public class Misc {
     public static final String   EMPTY_STRING = "";
     public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-    private static final String  SPACE_CHARS = "\\u0000-\\u0020\\u00A0\\u1680\\u180E\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200A\\u200B\\u202F\\u205F\\u3000\\uFEFF";
+    private static final String  SPACE_CHARS = "\\u0000-\\u0020\\u00A0\\u1680\\u180E\\u2000-\\u200B\\u202F\\u205F\\u3000\\uFEFF";
     private static final Pattern TRIM_SPACES = Pattern.compile("^[" + SPACE_CHARS + "]+|[" + SPACE_CHARS + "]+$");
 
     private static final String  MARKER_BEGIN = "{{";
