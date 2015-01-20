@@ -41,7 +41,7 @@ public class TestJson {
         Map<Object, Object> map1 = new LinkedHashMap<>();
         map1.put("string", "abcdef");
         map1.put("cyrill", "АБВабв");
-        map1.put("contrl", "\\\"'\r\n\u0000\u001f\u007f\u009f");
+        map1.put("contrl", "\\\"'\t\f\b\r\n\u0000\u001f\u007f\u009f");
         map1.put("number", 123.45);
         map1.put("bool",   false);
         map1.put("null",   null);

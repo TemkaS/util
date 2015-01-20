@@ -108,15 +108,17 @@ public class JsonEncoder {
         StringBuilder result = new StringBuilder(length + (length >>> 3) + 16);
 
         for (int i = 0; i < length; i++) {
-            char value = temp.charAt(i);
-            if (value <= 0x1f || (value >= 0x7f && value <= 0x9f)) {
-                printHex(result, "\\u", value, 16);
-            } else
-            if (value == '\"' || value == '\\') {
-                result.append('\\').append(value);
-            } else {
-                result.append(value);
+            char code = temp.charAt(i);
+
+            if (code < 128) {
+                String replace = CHAR_REPLACES[code];
+                if (replace != null) {
+                    result.append(replace);
+                    continue;
+                }
             }
+
+            result.append(code);
         }
 
         return result.toString();
@@ -129,11 +131,37 @@ public class JsonEncoder {
     };
 
 
-    private static void printHex(StringBuilder result, String prefix, int value, int index) {
-        result.append(prefix);
+    /**
+     * экранирование символов
+     */
+    private static String safe(int value) {
+        char[] temp = new char[6];
+        temp[0] = '\\';
+        temp[1] = 'u';
+        temp[2] = HEX_CHARS[(value >>> 12) & 15];
+        temp[3] = HEX_CHARS[(value >>>  8) & 15];
+        temp[4] = HEX_CHARS[(value >>>  4) & 15];
+        temp[5] = HEX_CHARS[(value       ) & 15];
+        return new String(temp);
+    }
 
-        while ((index-= 4) >= 0)
-            result.append(HEX_CHARS[(value >>> index) & 15]);
+
+    /**
+     * кэш экранированных символов
+     */
+    private static final String[] CHAR_REPLACES = new String[128];
+
+    static {
+        for (int value = 0; value < 32; value++)
+            CHAR_REPLACES[value] = safe(value);
+
+        CHAR_REPLACES['\"'] = "\\\"";
+        CHAR_REPLACES['\\'] = "\\\\";
+        CHAR_REPLACES['\t'] = "\\t";
+        CHAR_REPLACES['\b'] = "\\b";
+        CHAR_REPLACES['\n'] = "\\n";
+        CHAR_REPLACES['\r'] = "\\r";
+        CHAR_REPLACES['\f'] = "\\f";
 
     }
 
