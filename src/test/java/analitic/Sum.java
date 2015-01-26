@@ -4,20 +4,19 @@ package analitic;
 
 
 
-public class AvgValue {
+public class Sum implements Value {
     private double value = 0;
-    private double count = 0;
 
 
+    @Override
     public void add(double item) {
-        value+= item;
-        count+= 1;
+        value += item;
     }
 
 
+    @Override
     public double get() {
-        return value / count;
+        return value;
     }
-
 
 }

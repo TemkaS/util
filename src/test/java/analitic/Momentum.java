@@ -7,26 +7,28 @@ import java.util.List;
 
 
 
-public class Moment {
+public class Momentum implements Value {
     private final List<Double> data = new LinkedList<Double>();
-    private final AvgValue mean = new AvgValue();
-    private final double  pow;
+    private final Avg mean = new Avg();
+    private final double pow;
 
 
-    public Moment(double pow) {
+    public Momentum(double pow) {
         this.pow = pow;
     }
 
 
+    @Override
     public void add(double item) {
         data.add(item);
         mean.add(item);
     }
 
 
+    @Override
     public double get() {
-        double sum = 0.0;
         double avg = mean.get();
+        double sum = 0.0;
 
         for (Double item : data)
             sum+= Math.pow(item - avg, pow);
