@@ -4,12 +4,13 @@
  */
 package net.darkslave.prop;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -23,9 +24,8 @@ public class PropertyFilePresenter extends NamedPropertyPresenter {
     private volatile Set<String> names;
 
 
-    @SuppressWarnings("resource")
-    public PropertyFilePresenter(String path, Charset charset) throws IOException {
-        this(new FileInputStream(path), charset);
+    public PropertyFilePresenter(Path path, Charset charset) throws IOException {
+        this(Files.newInputStream(path), charset);
     }
 
 
