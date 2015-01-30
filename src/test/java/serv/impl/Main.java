@@ -3,6 +3,7 @@ package serv.impl;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -19,7 +20,7 @@ public class Main {
 
 
     public static void main(String[] args) throws IOException {
-        PropertyPresenter properties = new PropertyFilePresenter(PROPERTY_FILE, StandardCharsets.UTF_8);
+        PropertyPresenter properties = new PropertyFilePresenter(Paths.get(PROPERTY_FILE), StandardCharsets.UTF_8);
         PropertyPresenter serverProp = properties.getChild("server.");
 
         int serverPort = serverProp.getInteger("port", 8080);
