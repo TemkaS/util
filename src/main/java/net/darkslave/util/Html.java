@@ -1,20 +1,19 @@
-package util.old;
+package net.darkslave.util;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.darkslave.util.Misc;
-import net.darkslave.util.Regexp;
 
 
 
-
-
+/**
+ * Обработка строк для html
+ */
 public class Html {
 
-
     private static final Replacer[] SANITIZE = {
+
             // вырезаем элемент документа, если есть
             new BodyReplacer(),
 
@@ -43,7 +42,6 @@ public class Html {
 
             // заменяем хтмл сущности
             new EntityReplacer(),
-
     };
 
 
@@ -54,12 +52,12 @@ public class Html {
 
     private static class PatternReplacer implements Replacer {
         private final Pattern pattern;
-        private final String result;
+        private final String  result;
 
 
         public PatternReplacer(String pattern, String result) {
             this.pattern = Pattern.compile(pattern);
-            this.result = result;
+            this.result  = result;
         }
 
 
@@ -74,7 +72,6 @@ public class Html {
     private static class BodyReplacer implements Replacer {
         private static final Pattern pattern = Pattern.compile("(?is)<body[^>]*>(.*?)</body>");
 
-
         @Override
         public String replace(String source) {
             Matcher matcher = pattern.matcher(source);
@@ -82,6 +79,7 @@ public class Html {
                 return matcher.group(1);
             return source;
         }
+
     }
 
 
@@ -347,7 +345,7 @@ public class Html {
 
         private static final Pattern pattern = Pattern.compile("(?i)&(?:(\\w+)|#(\\d+)|#x([\\da-f]+));");
 
-        private static final Regexp.Replacer replacer = new Regexp.Replacer() {
+        private static final Regexp.Replacer<Object> replacer = new Regexp.Replacer<Object>() {
 
             @Override
             public Object replace(String[] match) {
@@ -369,15 +367,17 @@ public class Html {
                 return result;
             }
 
+
             private Character fromCode(String text, int radix) {
                 try {
                     return (char) Integer.parseInt(text, radix);
-                } catch(NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     return null;
                 }
             }
 
         };
+
 
         @Override
         public String replace(String source) {
@@ -385,7 +385,6 @@ public class Html {
         }
 
     }
-
 
 
     public static String sanitize(String source) {
@@ -399,71 +398,70 @@ public class Html {
     }
 
 
-
-
-    public static String nl2br(CharSequence source){
+    public static String nl2br(CharSequence source) {
         if (Misc.isEmpty(source))
             return Misc.EMPTY_STRING;
 
-        StringBuilder temp;
-        char c;
+        int length = source.length();
+        StringBuilder result = new StringBuilder(length + (length >>> 1));
 
-        int n = source.length();
-        temp = new StringBuilder(n);
-
-        for(int i = 0; i < n; i++) {
-            switch (c = source.charAt(i)) {
+        for (int index = 0; index < length; index++) {
+            char c = source.charAt(index);
+            switch (c) {
                 case '\r':
-                    if (i + 1 < n && source.charAt(i + 1) == '\n') i++;
+                    if (index + 1 < length && source.charAt(index + 1) == '\n')
+                        index++;
                 case '\n':
-                    temp.append("<br>");
+                    result.append("<br />");
                 break;
 
                 default:
-                    temp.append(c);
+                    result.append(c);
                 break;
             }
         }
 
-        return temp.toString();
+        return result.toString();
     }
 
 
-
-    public static String escape(CharSequence source){
+    public static String escape(CharSequence source) {
         if (Misc.isEmpty(source))
             return Misc.EMPTY_STRING;
 
-        StringBuilder temp;
-        char c;
+        int length = source.length();
+        StringBuilder result = new StringBuilder(length + (length >>> 1));
 
-        int n = source.length();
-        temp = new StringBuilder(n);
-
-        for(int i = 0; i < n; i++) {
-            switch (c = source.charAt(i)) {
+        for (int index = 0; index < length; index++) {
+            char c = source.charAt(index);
+            switch (c) {
                 case '"':
-                    temp.append("&quot;");
+                    result.append("&quot;");
                 break;
+
                 case '&':
-                    temp.append("&amp;");
+                    result.append("&amp;");
                 break;
+
                 case '\'':
-                    temp.append("&#39;");
+                    result.append("&#39;");
                 break;
+
                 case '<':
-                    temp.append("&lt;");
+                    result.append("&lt;");
                 break;
+
                 case '>':
-                    temp.append("&gt;");
+                    result.append("&gt;");
                 break;
+
                 default:
-                    temp.append(c);
+                    result.append(c);
                 break;
             }
         }
 
-        return temp.toString();
+        return result.toString();
     }
 
 

@@ -20,7 +20,7 @@ public class TestRegexp {
             System.out.println("2: " + Arrays.toString(line));
 
 
-        Regexp.Replacer replacer = new Regexp.Replacer() {
+        Regexp.Replacer<Object> replacer = new Regexp.Replacer<Object>() {
             @Override
             public Object replace(String[] match) {
                 return match[3] + "-" + match[2] + "-" + match[1];
