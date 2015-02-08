@@ -168,4 +168,14 @@ public class Statement implements AutoCloseable {
         target.close();
     }
 
+
+    public void addBatch() throws SQLException {
+        target.addBatch();
+    }
+
+
+    public int[] executeBatch() throws SQLException {
+        return target.executeBatch();
+    }
+
 }

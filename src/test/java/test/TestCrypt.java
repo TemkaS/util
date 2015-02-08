@@ -22,8 +22,8 @@ public class TestCrypt {
         IvParameterSpec iv = new IvParameterSpec(Bytes.fromHex("00102030405060708090A0B0C0D0E0F0"));
 
 
-        System.out.println("md5: " + Bytes.printHex( Crypt.hash("MD5", Bytes.from("12345", CHARSET)) ));
-        System.out.println("sha-1: " + Bytes.printHex( Crypt.hash("SHA-1", Bytes.from("12345", CHARSET)) ));
+        System.out.println("md5:     " + Bytes.printHex( Crypt.hash("MD5", Bytes.from("12345", CHARSET)) ));
+        System.out.println("sha-1:   " + Bytes.printHex( Crypt.hash("SHA-1", Bytes.from("12345", CHARSET)) ));
         System.out.println("sha-512: " + Bytes.printHex( Crypt.hash("SHA-512", Bytes.from("12345", CHARSET)) ));
 
 
