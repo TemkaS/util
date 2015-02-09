@@ -1,6 +1,5 @@
 package net.darkslave.io;
 
-import java.io.IOException;
 import java.io.Writer;
 
 
@@ -21,63 +20,63 @@ public class StringWriter extends Writer {
 
 
     @Override
-    public void write(int source) throws IOException {
+    public void write(int source) {
         target.append((char) source);
     }
 
 
     @Override
-    public void write(char[] source) throws IOException {
+    public void write(char[] source) {
         target.append(source);
     }
 
 
     @Override
-    public void write(char[] source, int from, int size) throws IOException {
+    public void write(char[] source, int from, int size) {
         target.append(source, from, size);
     }
 
 
     @Override
-    public void write(String source) throws IOException {
+    public void write(String source) {
         target.append(source);
     }
 
 
     @Override
-    public void write(String source, int from, int size) throws IOException {
+    public void write(String source, int from, int size) {
         target.append(source, from, from + size);
     }
 
 
     @Override
-    public Writer append(CharSequence source) throws IOException {
+    public Writer append(CharSequence source) {
         target.append(source);
         return this;
     }
 
 
     @Override
-    public Writer append(CharSequence source, int from, int till) throws IOException {
+    public Writer append(CharSequence source, int from, int till) {
         target.append(source, from, till);
         return this;
     }
 
 
     @Override
-    public Writer append(char source) throws IOException {
+    public Writer append(char source) {
         target.append(source);
         return this;
     }
 
 
     @Override
-    public void flush() throws IOException {
+    public void flush() {
     }
 
 
     @Override
-    public void close() throws IOException {
+    public void close() {
     }
 
 
