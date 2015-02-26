@@ -123,6 +123,107 @@ public class Misc {
 
 
     /**
+     * Получить строковое представление объекта или значение по умолчанию, если объект null
+     *
+     * @param source - исходный объект
+     * @param value  - значение по умолчанию
+     * @return строку
+     */
+    public static String toString(Object source, String value) {
+        return source != null ? source.toString() : value;
+    }
+
+
+    /**
+     * Объект-конвертер в Integer
+     */
+    public static final Getter<Number, Integer> GET_INTEGER = new Getter<Number, Integer>() {
+        @Override
+        public Integer get(Number source) {
+            return toInteger(source, null);
+        }
+    };
+
+
+    /**
+     * Объект-конвертер в Long
+     */
+    public static final Getter<Number, Long> GET_LONG = new Getter<Number, Long>() {
+        @Override
+        public Long get(Number source) {
+            return toLong(source, null);
+        }
+    };
+
+
+    /**
+     * Объект-конвертер в Double
+     */
+    public static final Getter<Number, Double> GET_DOUBLE = new Getter<Number, Double>() {
+        @Override
+        public Double get(Number source) {
+            return toDouble(source, null);
+        }
+    };
+
+
+    /**
+     * Преобразовать в Integer
+     *
+     * @param source - исходный объект Number
+     * @param value  - значение по умолчанию
+     * @return Integer
+     */
+    public static Integer toInteger(Number source, Integer value) {
+        if (source == null)
+            return value;
+
+        if (source instanceof Integer)
+            return (Integer) source;
+
+        return Integer.valueOf(source.intValue());
+    }
+
+
+    /**
+     * Преобразовать в Long
+     *
+     * @param source - исходный объект Number
+     * @param value  - значение по умолчанию
+     * @return Long
+     */
+    public static Long toLong(Number source, Long value) {
+        if (source == null)
+            return value;
+
+        if (source instanceof Long)
+            return (Long) source;
+
+        return Long.valueOf(source.longValue());
+    }
+
+
+    /**
+     * Преобразовать в Double
+     *
+     * @param source - исходный объект Number
+     * @param value  - значение по умолчанию
+     * @return Double
+     */
+    public static Double toDouble(Number source, Double value) {
+        if (source == null)
+            return value;
+
+        if (source instanceof Double)
+            return (Double) source;
+
+        return new Double(source.doubleValue());
+    }
+
+
+
+
+    /**
      * Удалить все пробельные символы из начала и конца строки
      *
      * @param source - исходная строка
