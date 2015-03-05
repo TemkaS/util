@@ -5,7 +5,6 @@
 package net.darkslave.reflect;
 
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -20,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 public class Reflect {
+
     private static Map<Class<?>, Map<String, Field>> Fields = new ConcurrentHashMap<Class<?>, Map<String, Field>>();
 
 
@@ -106,6 +106,19 @@ public class Reflect {
     }
 
 
+
+    /**
+     * Найти поле указанного класса по его сигнатуре.
+     *
+     * @param clazz - класс
+     * @param name  - имя поля
+     * @return поле класса
+     */
+    public static Field getField(Class<?> clazz, String name) {
+        return getFields(clazz).get(name);
+    }
+
+
     /**
      * Найти метод указанного класса по его сигнатуре.
      *
@@ -118,19 +131,6 @@ public class Reflect {
         return getMethods(clazz).get(new MethodSignature(name, args));
     }
 
-
-
-
-    public static <T> T newInstance(Class<T> parent, String className, Object ... args) throws ReflectiveOperationException {
-        Class<?> clazz = Class.forName(className);
-
-        Constructor<?>[] cons =  clazz.getConstructors();
-        if (cons.length > 1)
-            throw new UnsupportedOperationException("Constructor is ambiguous");
-
-        Object result = cons[0].newInstance(args);
-        return parent.cast(result);
-    }
 
 
 

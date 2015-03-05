@@ -36,6 +36,13 @@ public class TestJson {
 
     }
 
+    @JsonSerialize(replaceWith="name")
+    static enum C {
+        ELEMENT_1,
+        ELEMENT_2;
+    }
+
+
 
     public static void main(String[] args) throws Exception {
         Map<Object, Object> map1 = new LinkedHashMap<>();
@@ -58,6 +65,8 @@ public class TestJson {
 
         System.out.println("res: " + Json.encode(map1));
         System.out.println("res: " + JsonEncoder.encode(map1));
+
+        System.out.println("res: " + JsonEncoder.encode(C.ELEMENT_1));
     }
 
 

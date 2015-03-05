@@ -438,11 +438,17 @@ public class JsonEncoder {
                 continue;
             }
 
+
             // указан метод замены целевого объекта сериализации
             if (!isEmpty(targetName = anno.replaceWith())) {
-                Method target = clazz.getDeclaredMethod(targetName);
+                Method target = Reflect.getMethod(clazz, targetName);
+
+                if (target == null)
+                    throw new NoSuchMethodException(clazz + " " + targetName);
+
                 return new ReplaceEncoder(Property.create(target));
             }
+
 
             // указаны поля и методы сериализации
             JsonProperty[] properties = anno.value();
@@ -457,7 +463,10 @@ public class JsonEncoder {
 
                 // указан метод для сериализации свойства
                 if (!isEmpty(targetName = prop.method())) {
-                    Method target = clazz.getDeclaredMethod(targetName);
+                    Method target = Reflect.getMethod(clazz, targetName);
+
+                    if (target == null)
+                        throw new NoSuchMethodException(clazz + " " + targetName);
 
                     if (isEmpty(name))
                         name = targetName;
@@ -468,7 +477,10 @@ public class JsonEncoder {
 
                 // указано поле для сериализации свойства
                 if (!isEmpty(targetName = prop.field()) || !isEmpty(targetName = name)) {
-                    Field target = clazz.getDeclaredField(targetName);
+                    Field target = Reflect.getField(clazz, targetName);
+
+                    if (target == null)
+                        throw new NoSuchFieldException(clazz + " " + targetName);
 
                     if (isEmpty(name))
                         name = targetName;
