@@ -36,6 +36,10 @@ public class TestProp {
         PropertyPresenter prop2 = new ParametrizedPresenter(prop, System.getProperties());
         System.out.println("f = " + prop2.getString("f"));
 
+        // изменения в мапе влияют на обертки
+        map.put("f", "dir = temp");
+        System.out.println("f = " + prop2.getString("f"));
+
     }
 
 

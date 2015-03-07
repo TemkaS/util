@@ -5,7 +5,6 @@
 package net.darkslave.prop;
 
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,23 +16,25 @@ import java.util.Set;
  *  Класс-декоратор на map'ой строк
  */
 public class StringMapPresenter extends AbstractPropertyPresenter implements PropertyPresenter {
-    private final Map<String, String> parent;
+    private final Map<String, String> source;
 
 
-    public StringMapPresenter(Map<String, String> parent) {
-        this.parent = new HashMap<>(parent);
+    public StringMapPresenter(Map<String, String> source) {
+        if (source == null)
+            throw new IllegalArgumentException("Source map can't be null");
+        this.source = source;
     }
 
 
     @Override
     protected String getValue(String name) {
-        return parent.get(name);
+        return source.get(name);
     }
 
 
     @Override
     public Set<String> getNames() {
-        return parent.keySet();
+        return source.keySet();
     }
 
 
