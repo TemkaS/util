@@ -2,7 +2,7 @@
  * java utilites © darkslave.net
  * https://github.com/darkslave86/util
  */
- package net.darkslave.http;
+ package untested;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

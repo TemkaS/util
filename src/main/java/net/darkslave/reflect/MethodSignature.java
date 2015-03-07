@@ -11,10 +11,13 @@ import java.util.Arrays;
 
 
 
+
 /**
  * Класс сигнатуры метода
  */
 public class MethodSignature {
+    private static final Class<?>[] EMPTY_ARGS = new Class<?>[0];
+
     private final String name;
     private final Class<?>[] args;
 
@@ -36,7 +39,7 @@ public class MethodSignature {
             throw new IllegalArgumentException("Method args can't be null");
 
         this.name = name;
-        this.args = args;
+        this.args = args.length > 0 ? args.clone() : EMPTY_ARGS;
     }
 
 
@@ -51,6 +54,7 @@ public class MethodSignature {
 
 
     private volatile int hash = 0;
+
 
     @Override
     public int hashCode() {

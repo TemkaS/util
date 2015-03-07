@@ -2,7 +2,7 @@
  * java utilites © darkslave.net
  * https://github.com/darkslave86/util
  */
-package net.darkslave.graphics;
+package untested;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -11,7 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import net.darkslave.conc.Casket;
+import net.darkslave.vars.FutureHolder;
 
 
 
@@ -25,8 +25,8 @@ public class FutureRender<T> {
     private final Consumer<T> consumer;
     private final Producer<T> producer;
 
-    private final BlockingQueue<Casket<T>> consumerQueue;
-    private final BlockingQueue<Casket<T>> producerQueue;
+    private final BlockingQueue<FutureHolder<T>> consumerQueue;
+    private final BlockingQueue<FutureHolder<T>> producerQueue;
     private final int producerCount;
     private final int producerLimit;
 
@@ -45,8 +45,8 @@ public class FutureRender<T> {
         this.consumer = consumer;
         this.producer = producer;
 
-        this.consumerQueue = new LinkedBlockingQueue<Casket<T>>();
-        this.producerQueue = new LinkedBlockingQueue<Casket<T>>();
+        this.consumerQueue = new LinkedBlockingQueue<FutureHolder<T>>();
+        this.producerQueue = new LinkedBlockingQueue<FutureHolder<T>>();
         this.producerCount = count;
         this.producerLimit = limit;
 
@@ -64,7 +64,7 @@ public class FutureRender<T> {
         delay = TimeUnit.SECONDS.toNanos(1) / frequency;
 
         for (int i = 0; i < producerLimit; i++)
-            producerQueue.add(new Casket<T>(creator.create()));
+            producerQueue.add(new FutureHolder<T>(creator.create()));
 
         for (int i = 0; i < producerCount; i++)
             pool.execute(new ProducerWorker());
@@ -100,12 +100,12 @@ public class FutureRender<T> {
             while (!Thread.interrupted()) try {
                 long expired = System.nanoTime() + delay;
 
-                Casket<T> casket = consumerQueue.take();
+                FutureHolder<T> holder = consumerQueue.take();
 
                 try {
-                    consumer.consume(casket.get());
+                    consumer.consume(holder.get());
                 } finally {
-                    producerQueue.add(casket);
+                    producerQueue.add(holder);
                 }
 
                 long sleep = TimeUnit.NANOSECONDS.toMillis(expired - System.nanoTime());
@@ -124,10 +124,10 @@ public class FutureRender<T> {
         @Override
         public void run() {
             while (!Thread.interrupted()) try {
-                Casket<T> casket = producerQueue.take();
+                FutureHolder<T> holder = producerQueue.take();
 
-                T data = casket.get();
-                casket.lock();
+                T data = holder.get();
+                holder.reset();
 
                 long total;
 
@@ -135,13 +135,14 @@ public class FutureRender<T> {
                 try {
                     total = value;
                     value+= delay;
-                    consumerQueue.add(casket);
+                    consumerQueue.add(holder);
                 } finally {
                     lock.unlock();
                 }
 
                 producer.produce(data, total, delay);
-                casket.unlock();
+
+                holder.set(data);
 
             } catch (InterruptedException e) {
                 return;

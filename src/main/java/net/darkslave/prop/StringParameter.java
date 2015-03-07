@@ -8,7 +8,7 @@ package net.darkslave.prop;
 
 
 
-public class StringParameter extends StringPresenter {
+public class StringParameter extends AbstractStringPresenter {
     private final String value;
 
 
@@ -18,7 +18,7 @@ public class StringParameter extends StringPresenter {
 
 
     @Override
-    public String getValue() {
+    protected String getValue() {
         return value;
     }
 

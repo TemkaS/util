@@ -16,9 +16,9 @@ import java.util.List;
 /**
  * Абстрактный класс для разбора строк
  */
-abstract public class StringParser<T> {
+public abstract class StringParser<T> {
 
-    abstract public T parse(String source, T value);
+    public abstract T parse(String source, T value);
 
 
     /**
@@ -187,10 +187,13 @@ abstract public class StringParser<T> {
      * @param format - формат даты
      * @return дата
      */
-    public static Date toDate(String source, Date value, DateFormat format) {
+    public static Date toDate(String source, DateFormat format, Date value) {
         try {
-            if (format == null || isEmpty(source))
+            if (isEmpty(source))
                 return value;
+
+            if (format == null)
+                throw new IllegalArgumentException("Date format can't be null");
 
             return format.parse(source);
 
@@ -208,16 +211,30 @@ abstract public class StringParser<T> {
      * @param format - формат даты
      * @return дата
      */
-    public static Date toDate(String source, Date value, String format) {
-        try {
-            if (isEmpty(format) || isEmpty(source))
-                return value;
+    public static Date toDate(String source, String format, Date value) {
+        return toDate(source, dateFormatFactory.get(format), value);
+    }
 
-            return DateService.parse(source, format);
 
-        } catch (ParseException e) {
-            return value;
-        }
+
+    private static volatile DateFormatFactory dateFormatFactory = DateFormatFactory.DEFAULT_FACTORY;
+
+
+    /**
+     * Получить текущую фабрику дейт-форматтеров
+     */
+    public static DateFormatFactory getDateFormatFactory() {
+        return dateFormatFactory;
+    }
+
+
+    /**
+     * Установить текущую фабрику дейт-форматтеров
+     */
+    public static void setDateFormatFactory(DateFormatFactory factory) {
+        if (factory == null)
+            throw new IllegalArgumentException("Parameter can't be null");
+        dateFormatFactory = factory;
     }
 
 
@@ -231,7 +248,6 @@ abstract public class StringParser<T> {
     public static boolean isEmpty(CharSequence source) {
         return source == null || source.length() == 0;
     }
-
 
 
 }

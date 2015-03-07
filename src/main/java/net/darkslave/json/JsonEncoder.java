@@ -35,7 +35,6 @@ public class JsonEncoder {
      * @return сериализованную строку
      * @throws IOException
      */
-    @SuppressWarnings("resource")
     public static String encode(Object source) throws IOException {
         StringWriter writer = new StringWriter(512);
         encode(source, writer);
@@ -188,7 +187,7 @@ public class JsonEncoder {
 
         for (int index = 0; index < level; index++)
             if (stack.get(index) == value)
-                throw new JsonException("Recursion found for " + value.getClass());
+                throw new JsonException("Circular reference in " + value.getClass());
 
     }
 
@@ -444,7 +443,7 @@ public class JsonEncoder {
                 Method target = Reflect.getMethod(clazz, targetName);
 
                 if (target == null)
-                    throw new NoSuchMethodException(clazz + " " + targetName);
+                    throw new NoSuchMethodException(targetName + " in " + clazz);
 
                 return new ReplaceEncoder(Property.create(target));
             }
@@ -466,7 +465,7 @@ public class JsonEncoder {
                     Method target = Reflect.getMethod(clazz, targetName);
 
                     if (target == null)
-                        throw new NoSuchMethodException(clazz + " " + targetName);
+                        throw new NoSuchMethodException(targetName + " in " + clazz);
 
                     if (isEmpty(name))
                         name = targetName;
@@ -480,7 +479,7 @@ public class JsonEncoder {
                     Field target = Reflect.getField(clazz, targetName);
 
                     if (target == null)
-                        throw new NoSuchFieldException(clazz + " " + targetName);
+                        throw new NoSuchFieldException(targetName + " in " + clazz);
 
                     if (isEmpty(name))
                         name = targetName;

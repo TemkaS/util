@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 
 
 
-abstract public class Property {
+public abstract class Property {
 
 
     public static Property create(Field delegate) {

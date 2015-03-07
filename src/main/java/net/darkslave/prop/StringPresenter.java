@@ -8,8 +8,6 @@ package net.darkslave.prop;
 import java.text.DateFormat;
 import java.util.Date;
 
-import net.darkslave.util.StringParser;
-
 
 
 
@@ -17,87 +15,49 @@ import net.darkslave.util.StringParser;
 /**
  *  Класс-контейнер для представления строковых значений
  */
-abstract public class StringPresenter {
+public interface StringPresenter {
 
 
-    abstract public String getValue();
+    Boolean getBoolean(Boolean value);
 
 
-    public Boolean getBoolean(Boolean value) {
-        return StringParser.toBoolean(getValue(), value);
-    }
+    Boolean getBoolean();
 
 
-    public Boolean getBoolean() {
-        return getBoolean(null);
-    }
+    Integer getInteger(Integer value);
 
 
-    public Integer getInteger(Integer value) {
-        return StringParser.toInteger(getValue(), value);
-    }
+    Integer getInteger();
 
 
-    public Integer getInteger() {
-        return getInteger(null);
-    }
+    Long getLong(Long value);
 
 
-    public Long getLong(Long value) {
-        return StringParser.toLong(getValue(), value);
-    }
+    Long getLong();
 
 
-    public Long getLong() {
-        return getLong(null);
-    }
+    Double getDouble(Double value);
 
 
-    public Double getDouble(Double value) {
-        return StringParser.toDouble(getValue(), value);
-    }
+    Double getDouble();
 
 
-    public Double getDouble() {
-        return getDouble(null);
-    }
+    Date getDate(DateFormat format, Date value);
 
 
-    public Date getDate(Date value, DateFormat format) {
-        return StringParser.toDate(getValue(), value, format);
-    }
+    Date getDate(DateFormat format);
 
 
-    public Date getDate(DateFormat format) {
-        return getDate(null, format);
-    }
+    Date getDate(String format, Date value);
 
 
-    public Date getDate(Date value, String format) {
-        return StringParser.toDate(getValue(), value, format);
-    }
+    Date getDate(String format);
 
 
-    public Date getDate(String format) {
-        return getDate(null, format);
-    }
+    String getString(String value);
 
 
-    public String getString(String value) {
-        String param = getValue();
-        return param != null ? param : value;
-    }
-
-
-    public String getString() {
-        return getValue();
-    }
-
-
-    @Override
-    public String toString() {
-        return getValue();
-    }
+    String getString();
 
 
 }

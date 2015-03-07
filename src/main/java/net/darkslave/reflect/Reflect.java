@@ -97,9 +97,8 @@ public class Reflect {
         Map<MethodSignature, Method> result = new HashMap<MethodSignature, Method>();
 
         while ((clazz = deque.pollLast()) != null) {
-            for (Method method : clazz.getDeclaredMethods()) {
+            for (Method method : clazz.getDeclaredMethods())
                 result.put(new MethodSignature(method), method);
-            }
         }
 
         return Collections.unmodifiableMap(result);

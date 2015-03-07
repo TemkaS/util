@@ -2,15 +2,12 @@
  * java utilites © darkslave.net
  * https://github.com/darkslave86/util
  */
-package net.darkslave.util;
+package net.darkslave.vars;
 
 
 
 /**
  * Класс key-value хранилища
- *
- * @param <K>
- * @param <V>
  */
 public final class Entry<K, V> {
     private final K key;
@@ -30,12 +27,6 @@ public final class Entry<K, V> {
 
     public V getValue() {
         return val;
-    }
-
-
-    @Override
-    public String toString() {
-        return "{" + key + ": " + val + "}";
     }
 
 

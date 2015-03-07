@@ -7,7 +7,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 
-
+/**
+ * Утилита работы с mime-типами
+ */
 public class MimeTypes {
     private static final Map<String, String> cache = new ConcurrentHashMap<String, String>();
 

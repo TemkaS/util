@@ -38,8 +38,8 @@ public class TestJson {
 
     @JsonSerialize(replaceWith="name")
     static enum C {
-        ELEMENT_1,
-        ELEMENT_2;
+        Beer,
+        Vodka;
     }
 
 
@@ -66,7 +66,7 @@ public class TestJson {
         System.out.println("res: " + Json.encode(map1));
         System.out.println("res: " + JsonEncoder.encode(map1));
 
-        System.out.println("res: " + JsonEncoder.encode(C.ELEMENT_1));
+        System.out.println("res: " + JsonEncoder.encode(C.Beer));
     }
 
 

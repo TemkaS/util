@@ -14,6 +14,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import net.darkslave.vars.Entry;
+import net.darkslave.vars.Getter;
 
 
 

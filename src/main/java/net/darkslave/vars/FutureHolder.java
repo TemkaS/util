@@ -2,7 +2,7 @@
  * java utilites © darkslave.net
  * https://github.com/darkslave86/util
  */
-package net.darkslave.conc;
+package net.darkslave.vars;
 
 
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
@@ -11,67 +11,66 @@ import java.util.concurrent.locks.AbstractQueuedSynchronizer;
 
 
 /**
- * Запираемое значение (шкатулка)
+ * Контейнер для значений, устанавливаемых другими потоками
  */
-public class Casket<T> {
+public class FutureHolder<T> implements Holder<T> {
     private final Sync<T> sync = new Sync<T>();
 
 
     /**
-     * Инициализация без установленного значения (шкатулка закрыта)
+     * Инициализация без установленного значения
      */
-    public Casket() {
+    public FutureHolder() {
     }
 
 
     /**
-     * Инициализация с установленным значением (шкатулка открыта)
+     * Инициализация с установленным значением
      */
-    public Casket(T value) {
+    public FutureHolder(T value) {
         sync.set(value);
     }
 
 
     /**
-     * Получить значение контейнера
+     * Получить значение контейнера:<br>
      * если значение еще не установлено, поток добавляется в очередь ожидания
      */
-    public T get() throws InterruptedException {
-        return sync.get();
+    @Override
+    public T get() {
+        try {
+            return sync.get();
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(ie);
+        }
     }
 
 
     /**
-     * Установить значение контейнера
-     * если значение не было до этого установлено, все ожидающие потоки будут освобождены,
+     * Установить значение:<br>
+     * если значение не было до этого установлено, все ожидающие потоки будут освобождены,<br>
      * если значение уже было установлено, то вызов не имеет никакого эффекта
      */
+    @Override
     public void set(T value) {
         sync.set(value);
     }
 
 
     /**
-     * Сбросить флаг установки (запереть шкатулку)
+     * Сбросить флаг установки значения
      */
-    public void lock() {
-        sync.lock();
-    }
-
-
-    /**
-     * Установить флаг установки (открыть шкатулку)
-     */
-    public void unlock() {
-        sync.unlock();
+    public void reset() {
+        sync.reset();
     }
 
 
     /**
      * Проверка флага установки
      */
-    public boolean isLocked() {
-        return sync.isLocked();
+    public boolean isset() {
+        return sync.isset();
     }
 
 
@@ -104,17 +103,12 @@ public class Casket<T> {
         }
 
 
-        public void lock() {
+        public void reset() {
             setState(NEW);
         }
 
 
-        public void unlock() {
-            releaseShared(0);
-        }
-
-
-        public boolean isLocked() {
+        public boolean isset() {
             return getState() == SET;
         }
 

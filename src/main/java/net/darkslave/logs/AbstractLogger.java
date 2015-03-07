@@ -9,7 +9,7 @@ package net.darkslave.logs;
 /**
  * Абстрактный класс логгера ошибок
  */
-abstract public class AbstractLogger implements Logger {
+public abstract class AbstractLogger implements Logger {
 
     @Override
     public void info(String content) {
@@ -59,6 +59,6 @@ abstract public class AbstractLogger implements Logger {
     }
 
 
-    abstract protected void print(String type, String content, Throwable e);
+    protected abstract void print(String type, String content, Throwable e);
 
 }
