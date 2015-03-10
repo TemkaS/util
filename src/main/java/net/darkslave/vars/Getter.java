@@ -6,7 +6,7 @@ package net.darkslave.vars;
 
 
 
-
+@FunctionalInterface
 public interface Getter<T, V> {
 
     V get(T source);

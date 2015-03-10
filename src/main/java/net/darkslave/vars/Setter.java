@@ -6,7 +6,7 @@ package net.darkslave.vars;
 
 
 
-
+@FunctionalInterface
 public interface Setter<T, V> {
 
     void set(T source, V value);

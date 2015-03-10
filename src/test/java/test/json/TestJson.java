@@ -3,6 +3,7 @@ package test.json;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import net.darkslave.json.*;
+import net.darkslave.util.Misc;
 
 
 
@@ -67,6 +68,14 @@ public class TestJson {
         System.out.println("res: " + JsonEncoder.encode(map1));
 
         System.out.println("res: " + JsonEncoder.encode(C.Beer));
+
+        Throwable e = new Exception("The main exception", new Exception("Cause exception"));
+        e.addSuppressed(new Exception("Suppressed exception"));
+
+        System.out.println("res: " + Misc.getErrorTrace(e));
+
+        System.out.println("res: " + JsonEncoder.encode(e));
+
     }
 
 
