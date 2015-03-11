@@ -13,7 +13,8 @@ import java.util.Arrays;
 
 
 /**
- * Класс сигнатуры метода
+ * Класс сигнатуры метода<br>
+ * immutable
  */
 public class MethodSignature {
     private static final Class<?>[] EMPTY_ARGS = new Class<?>[0];

@@ -7,7 +7,8 @@ package net.darkslave.vars;
 
 
 /**
- * Класс key-value хранилища
+ * Класс key-value хранилища<br>
+ * immutable только если key и val являются immutable
  */
 public final class Entry<K, V> {
     private final K key;
@@ -30,20 +31,14 @@ public final class Entry<K, V> {
     }
 
 
-    private volatile int hash = 0;
-
     @Override
     public int hashCode() {
-        int temp = hash;
+        int hash = 11;
 
-        if (temp == 0) {
-            temp = 11;
-            temp+= 31 * temp + (key != null ? key.hashCode() : 17);
-            temp+= 31 * temp + (val != null ? val.hashCode() : 17);
-            hash = temp;
-        }
+        hash+= 31 * hash + (key != null ? key.hashCode() : 17);
+        hash+= 31 * hash + (val != null ? val.hashCode() : 17);
 
-        return temp;
+        return hash;
     }
 
 
@@ -55,10 +50,16 @@ public final class Entry<K, V> {
         if (obj == null || !(obj instanceof Entry))
             return false;
 
-        Entry<?, ?> other = (Entry<?, ?>) obj;
+        Entry<?, ?> oth = (Entry<?, ?>) obj;
 
-        return ((key == other.key) || (key != null && key.equals(other.key)))
-            && ((val == other.val) || (val != null && val.equals(other.val)));
+        if (!(key == oth.key || (key != null && key.equals(oth.key))))
+            return false;
+
+        if (!(val == oth.val || (val != null && val.equals(oth.val))))
+            return false;
+
+        return true;
     }
+
 
 }
