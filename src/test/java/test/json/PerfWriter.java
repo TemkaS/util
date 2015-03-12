@@ -43,7 +43,8 @@ public class PerfWriter {
 
     public static void main(String[] args) throws Exception {
 
-        System.out.println("std: " + write(new java.io.StringWriter()));
+        System.out.println("std: " + write(new java.io.StringWriter(512)));
+        System.out.println("chr: " + write(new java.io.CharArrayWriter(512)));
         System.out.println("new: " + write(new net.darkslave.io.StringWriter(512)));
 
 
@@ -59,7 +60,7 @@ public class PerfWriter {
             //---------------------------------------------
             time = System.nanoTime();
             for (int i = 0; i < REPEAT; i++) {
-                Writer wr = new java.io.StringWriter();
+                Writer wr = new java.io.StringWriter(512);
                 for (int j = 0; j < SIZE; j++) {
                     wr.write(LINE);
                 }
@@ -67,6 +68,20 @@ public class PerfWriter {
             origin = time = System.nanoTime() - time;
             System.out.printf("%02d std ~ %5.2f ms.%n", ROUND, time * 1e-6);
             //---------------------------------------------
+
+
+            //---------------------------------------------
+            time = System.nanoTime();
+            for (int i = 0; i < REPEAT; i++) {
+                Writer wr = new java.io.CharArrayWriter(512);
+                for (int j = 0; j < SIZE; j++) {
+                    wr.write(LINE);
+                }
+            }
+            time = System.nanoTime() - time;
+            System.out.printf("%02d chr ~ %5.2f ms. (%+3.0f%%)%n", ROUND, time * 1e-6, (100.0 * (time - origin) / origin));
+            //---------------------------------------------
+
 
 
             //---------------------------------------------
