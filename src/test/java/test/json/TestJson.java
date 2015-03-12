@@ -15,7 +15,7 @@ public class TestJson {
     static class A {
         private double field = 123.45;
 
-        private Object replaceWith() {
+        protected Object replaceWith() {
             return new Object[] {
                 "class.A",
                 field
@@ -31,16 +31,24 @@ public class TestJson {
     static class B {
         private double field = 123.45;
 
-        private Object getField() {
+        protected Object getField() {
             return field;
         }
 
     }
 
+
+    static class C {
+        private static    double fieldS = 123.45;
+        private transient double fieldT = 123.45;
+        private double field = 123.45;
+    }
+
+
     @JsonSerialize(replaceWith="name")
-    static enum C {
+    static enum E {
         Beer,
-        Vodka;
+        Wine;
     }
 
 
@@ -55,6 +63,8 @@ public class TestJson {
         map1.put("null",   null);
         map1.put("objA",   new A());
         map1.put("objB",   new B());
+        map1.put("objC",   new C());
+        map1.put("objE",   E.Beer);
 
         Map<Object, Object> map2 = new LinkedHashMap<>();
         map1.put("map",    map2);
@@ -67,14 +77,14 @@ public class TestJson {
         System.out.println("res: " + Json.encode(map1));
         System.out.println("res: " + JsonEncoder.encode(map1));
 
-        System.out.println("res: " + JsonEncoder.encode(C.Beer));
+
 
         Throwable e = new Exception("The main exception", new Exception("Cause exception"));
         e.addSuppressed(new Exception("Suppressed exception"));
 
         System.out.println("res: " + Misc.getErrorTrace(e));
 
-        System.out.println("res: " + JsonEncoder.encode(e));
+        // System.out.println("res: " + JsonEncoder.encode(e));
 
     }
 

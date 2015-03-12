@@ -493,13 +493,18 @@ public class JsonEncoder {
             return new PropertyEncoder(result);
         }
 
-        // если ничего не указано, сериализуем все не статичные поля объекта
+        // если ничего не указано, сериализуем все поля объекта
         Map<String, Property> result = new HashMap<String, Property>();
 
         for (Map.Entry<String, Field> e : Reflect.getFields(origin).entrySet()) {
             Field field = e.getValue();
 
+            // игнорируем статик поля
             if ((field.getModifiers() & Modifier.STATIC) != 0)
+                continue;
+
+            // игнорируем тарзиент поля
+            if ((field.getModifiers() & Modifier.TRANSIENT) != 0)
                 continue;
 
             result.put(e.getKey(), Property.create(field));
