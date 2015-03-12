@@ -64,29 +64,6 @@ public class JsonEncoder {
     private static final String MAPS_BEG  = "{";
     private static final String MAPS_END  = "}";
 
-    private static final int ENTRY_ESC_PADD = ENTRY_ESC.length() << 1;
-
-
-    /**
-     * Сериализация объекта в json формат для использования в именах свойств
-     *
-     * @param source - исходный объект
-     * @return сериализованную строку
-     */
-    public static String encodeKey(Object source) {
-        if (source == null)
-            return MARK_NULL;
-
-        String temp = escape(source);
-
-        StringBuilder result = new StringBuilder(temp.length() + ENTRY_ESC_PADD);
-
-        result.append(ENTRY_ESC);
-        result.append(temp);
-        result.append(ENTRY_ESC);
-
-        return result.toString();
-    }
 
 
     /**
@@ -193,13 +170,20 @@ public class JsonEncoder {
     }
 
 
-    private void write(String source) throws IOException {
-        writer.write(source);
+    private void writeEscaped(Object value) throws IOException {
+        write(ENTRY_ESC);
+        write(escape(value));
+        write(ENTRY_ESC);
     }
 
 
-    private void write(Object source) throws IOException {
-        writer.write(source.toString());
+    private void write(String value) throws IOException {
+        writer.write(value);
+    }
+
+
+    private void write(Object value) throws IOException {
+        writer.write(value.toString());
     }
 
 
@@ -220,9 +204,7 @@ public class JsonEncoder {
         // символы и строки
         if (value instanceof CharSequence
                 || value instanceof Character) {
-            write(ENTRY_ESC);
-            write(escape(value));
-            write(ENTRY_ESC);
+            writeEscaped(value);
             return;
         }
 
@@ -240,9 +222,7 @@ public class JsonEncoder {
 
         // исключения
         if (value instanceof Throwable) {
-            write(ENTRY_ESC);
-            write(escape(Misc.getErrorTrace((Throwable) value)));
-            write(ENTRY_ESC);
+            writeEscaped(Misc.getErrorTrace((Throwable) value));
             return;
         }
 
@@ -318,7 +298,7 @@ public class JsonEncoder {
             if (index > 0)
                 write(ITEMS_SEP);
 
-            write(encodeKey(entry.getKey()));
+            writeEscaped(entry.getKey());
             write(ENTRY_SEP);
 
             encode(entry.getValue(), level + 1);
@@ -351,7 +331,7 @@ public class JsonEncoder {
             if (index > 0)
                 write(ITEMS_SEP);
 
-            write(encodeKey(entry.getKey()));
+            writeEscaped(entry.getKey());
             write(ENTRY_SEP);
 
             Object result;
