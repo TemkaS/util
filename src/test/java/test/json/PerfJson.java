@@ -9,7 +9,7 @@ import net.darkslave.json.*;
 
 
 
-public class TestJson2 {
+public class PerfJson {
     private static String result;
 
 
@@ -43,7 +43,7 @@ public class TestJson2 {
             //---------------------------------------------
             time = System.nanoTime();
             for (int i = 0; i < REPEAT; i++) {
-                result = Json.encode(map1);
+                result = JsonEncoderOld.encode(map1);
             }
             origin = time = System.nanoTime() - time;
             System.out.printf("%02d old ~ %5.2f ms.%n", ROUND, time * 1e-6);

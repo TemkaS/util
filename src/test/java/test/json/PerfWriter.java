@@ -8,7 +8,7 @@ import net.darkslave.util.Misc;
 
 
 
-public class TestWriter {
+public class PerfWriter {
 
 
     private static String write(Writer wr) throws IOException {

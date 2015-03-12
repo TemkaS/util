@@ -11,6 +11,9 @@ import java.lang.annotation.Target;
 
 
 
+/**
+ * Параметры сериализации типа
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface JsonSerialize {

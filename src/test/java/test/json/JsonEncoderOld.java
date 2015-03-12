@@ -23,7 +23,7 @@ import net.darkslave.reflect.Reflect;
 
 
 
-public class Json {
+public class JsonEncoderOld {
     private static final String EMPTY_STRING = "";
     private static final String MARK_NULL = "null";
     private static final String ITEMS_SEP = ", ";
@@ -52,14 +52,14 @@ public class Json {
      */
     public static String encode(Object value) throws JsonException, IOException {
         StringWriter writer = new StringWriter();
-        Json encoder = new Json(writer);
+        JsonEncoderOld encoder = new JsonEncoderOld(writer);
         encoder.encode(value, 0);
         return writer.toString();
     }
 
 
     public static void encode(Object value, Writer writer) throws JsonException, IOException {
-        Json encoder = new Json(writer);
+        JsonEncoderOld encoder = new JsonEncoderOld(writer);
         encoder.encode(value, 0);
     }
 
@@ -174,7 +174,7 @@ public class Json {
     private final Writer writer;
 
 
-    private Json(Writer w) {
+    private JsonEncoderOld(Writer w) {
         stack  = new ArrayList<Object>();
         writer = w;
     }

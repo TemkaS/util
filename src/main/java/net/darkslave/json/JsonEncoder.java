@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.darkslave.io.StringWriter;
 import net.darkslave.reflect.Property;
 import net.darkslave.reflect.Reflect;
+import net.darkslave.util.Misc;
 
 
 
@@ -36,7 +37,7 @@ public class JsonEncoder {
      * @throws IOException
      */
     public static String encode(Object source) throws IOException {
-        StringWriter writer = new StringWriter(512);
+        StringWriter writer = new StringWriter(1024);
         encode(source, writer);
         return writer.toString();
     }
@@ -168,25 +169,25 @@ public class JsonEncoder {
 
     /**********************************************************************************************
     */
-    private final List<Object> stack;
+    private final List<Object> dejavu;
     private final Writer writer;
 
 
     private JsonEncoder(Writer w) {
-        stack  = new ArrayList<Object>(32);
+        dejavu = new ArrayList<Object>(32);
         writer = w;
     }
 
 
-    private void check(Object value, int level) throws JsonException {
-        if (level < stack.size()) {
-            stack.set(level, value);
+    private void dejavu(Object value, int level) throws JsonException {
+        if (level < dejavu.size()) {
+            dejavu.set(level, value);
         } else {
-            stack.add(level, value);
+            dejavu.add(level, value);
         }
 
         for (int index = 0; index < level; index++)
-            if (stack.get(index) == value)
+            if (dejavu.get(index) == value)
                 throw new JsonException("Circular reference in " + value.getClass());
 
     }
@@ -237,8 +238,16 @@ public class JsonEncoder {
             return;
         }
 
+        // исключения
+        if (value instanceof Throwable) {
+            write(ENTRY_ESC);
+            write(escape(Misc.getErrorTrace((Throwable) value)));
+            write(ENTRY_ESC);
+            return;
+        }
+
         // проверка рекурсии
-        check(value, level);
+        dejavu(value, level);
 
         Class<?> clazz = value.getClass();
 
@@ -503,8 +512,13 @@ public class JsonEncoder {
             if ((field.getModifiers() & Modifier.STATIC) != 0)
                 continue;
 
-            // игнорируем тарзиент поля
+            // игнорируем транзиент поля
             if ((field.getModifiers() & Modifier.TRANSIENT) != 0)
+                continue;
+
+            // игнорируем аннотированные поля
+            JsonIgnore ignore = field.getAnnotation(JsonIgnore.class);
+            if (ignore != null)
                 continue;
 
             result.put(e.getKey(), Property.create(field));

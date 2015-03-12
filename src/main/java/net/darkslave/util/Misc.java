@@ -6,7 +6,6 @@ package net.darkslave.util;
 
 
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import net.darkslave.io.StringWriter;
 import net.darkslave.vars.Entry;
 import net.darkslave.vars.Getter;
 
@@ -605,8 +605,8 @@ public class Misc {
      * @return строку стектрейса
      */
     public static String getErrorTrace(Throwable e) {
-        StringWriter str = new StringWriter();
-        PrintWriter prn = new PrintWriter(str);
+        StringWriter str = new StringWriter(1024);
+        PrintWriter  prn = new PrintWriter(str);
 
         e.printStackTrace(prn);
         prn.flush();

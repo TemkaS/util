@@ -9,6 +9,9 @@ import java.lang.annotation.RetentionPolicy;
 
 
 
+/**
+ * Определение поля / метода сериализации
+ */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JsonProperty {
 

@@ -1,9 +1,9 @@
 package test.json;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.stream.Collectors;
 import net.darkslave.json.*;
-import net.darkslave.util.Misc;
 
 
 
@@ -11,42 +11,74 @@ import net.darkslave.util.Misc;
 
 public class TestJson {
 
-    @JsonSerialize(replaceWith="replaceWith")
-    static class A {
-        private double field = 123.45;
+    /**
+     * Класс с указанием метода замены
+     */
+    @JsonSerialize(replaceWith = "someMethod")
+    protected static class A {
+        protected String val = "abcdef";
 
-        protected Object replaceWith() {
+        protected Object someMethod() {
             return new Object[] {
-                "class.A",
-                field
+                A.class.getCanonicalName(),
+                val
             };
         }
     }
 
-    @JsonSerialize({
-        @JsonProperty("field"),
-        @JsonProperty(value="field2", field="field"),
-        @JsonProperty(value="field3", method="getField"),
-    })
-    static class B {
-        private double field = 123.45;
 
-        protected Object getField() {
-            return field;
+
+    /**
+     * Класс с указанием полей и методов сериализации
+     */
+    @JsonSerialize({
+        // сериализация поля aa
+        @JsonProperty("aa"),
+
+        // сериализация поля bb под синонимом xx
+        @JsonProperty(value="xx", field="bb"),
+
+        // сериализация через геттер yy под снонимом yy
+        @JsonProperty(value="yy", method="yy"),
+
+    })
+    protected static class B {
+        protected String aa = "abcdef";
+        protected double bb = 123.45;
+
+        protected boolean yy() {
+            return true;
         }
 
     }
 
 
-    static class C {
-        private static    double fieldS = 123.45;
-        private transient double fieldT = 123.45;
-        private double field = 123.45;
+
+    /**
+     * Класс с дефолтовой сериализацией полей
+     */
+    protected static class C {
+        // обычное поле будет сериализовано
+        protected String aa = "abcdef";
+
+        // транзиент поле будет пропущено
+        protected transient double bb = 123.45;
+
+        // статик поле будет пропущено
+        protected static    double cc = 123.45;
+
+        // поле с такой аннотацией будет пропущено
+        @JsonIgnore
+        protected double dd = 123.45;
+
     }
 
 
-    @JsonSerialize(replaceWith="name")
-    static enum E {
+    /**
+     * Простая сериализация енумов через имя
+     */
+    @JsonSerialize(replaceWith = "name")
+    protected static enum E {
         Beer,
         Wine;
     }
@@ -54,37 +86,39 @@ public class TestJson {
 
 
     public static void main(String[] args) throws Exception {
-        Map<Object, Object> map1 = new LinkedHashMap<>();
-        map1.put("string", "abcdef");
-        map1.put("cyrill", "АБВабв");
-        map1.put("contrl", "\\\"'\t\f\b\r\n\u0000\u001f\u007f\u009f");
-        map1.put("number", 123.45);
-        map1.put("bool",   false);
-        map1.put("null",   null);
-        map1.put("objA",   new A());
-        map1.put("objB",   new B());
-        map1.put("objC",   new C());
-        map1.put("objE",   E.Beer);
-
-        Map<Object, Object> map2 = new LinkedHashMap<>();
-        map1.put("map",    map2);
-
-        map2.put("string", "abcdef");
-        map2.put("number", 123.45);
-        map2.put("bool",   false);
-        // map2.put("map1",   map1);
-
-        System.out.println("res: " + Json.encode(map1));
-        System.out.println("res: " + JsonEncoder.encode(map1));
+        Throwable error = new Exception("The main exception", new Exception("Cause exception"));
+        error.addSuppressed(new Exception("Suppressed exception"));
 
 
+        Object[][] test = {
+                { "class.A",  new A() },
+                { "class.B",  new B() },
+                { "class.C",  new C() },
+                { "class.E",  E.Beer  },
+                { "boolean",  false },
+                { "number",   123.45 },
+                { "string",   "abcdef" },
+                { "cyrillic", "АБВабв" },
+                { "controls", "\\\"'\t\f\b\r\n\u0000\u001f\u007f\u009f" },
+                { "array",    new Object[] { false, 123.45, "abcdef" } },
+                { "list",     Arrays.asList( false, 123.45, "abcdef" ) },
+                { "map",      Arrays.asList( false, 123.45, "abcdef" ).stream()
+                    .collect(Collectors.toMap(
+                        (Object val) -> {
+                            return val.getClass().getSimpleName().toLowerCase();
+                        },
+                        (Object val) -> {
+                            return val;
+                        }
+                    ))
+                },
+                { "date",     new Date() },
+                { "error",    error },
+                { "null",     null  },
+        };
 
-        Throwable e = new Exception("The main exception", new Exception("Cause exception"));
-        e.addSuppressed(new Exception("Suppressed exception"));
-
-        System.out.println("res: " + Misc.getErrorTrace(e));
-
-        // System.out.println("res: " + JsonEncoder.encode(e));
+        for (Object[] a : test)
+            System.out.printf("%-10s:  %s%n", a[0], JsonEncoder.encode(a[1]));
 
     }
 
