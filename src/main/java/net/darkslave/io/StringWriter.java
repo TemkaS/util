@@ -1,10 +1,14 @@
 package net.darkslave.io;
 
+import java.io.IOException;
 import java.io.Writer;
 
 
 
 
+/**
+ * Реализация java.io.StringWriter без синхронизации
+ */
 public class StringWriter extends Writer {
     private final StringBuilder target;
 
@@ -83,6 +87,11 @@ public class StringWriter extends Writer {
     @Override
     public String toString() {
         return target.toString();
+    }
+
+
+    public void writeTo(Writer output) throws IOException {
+        output.append(target);
     }
 
 

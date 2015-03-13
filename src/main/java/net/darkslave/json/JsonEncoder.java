@@ -18,7 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import net.darkslave.io.StringWriter;
+import net.darkslave.io.CharArrayWriter;
 import net.darkslave.reflect.Property;
 import net.darkslave.reflect.Reflect;
 import net.darkslave.util.Misc;
@@ -37,9 +37,10 @@ public class JsonEncoder {
      * @throws IOException
      */
     public static String encode(Object source) throws IOException {
-        StringWriter writer = new StringWriter(1024);
-        encode(source, writer);
-        return writer.toString();
+        try (CharArrayWriter writer = new CharArrayWriter(1024)) {
+            encode(source, writer);
+            return writer.toString();
+        }
     }
 
 

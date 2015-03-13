@@ -43,10 +43,14 @@ public class PerfWriter {
 
     public static void main(String[] args) throws Exception {
 
-        System.out.println("std: " + write(new java.io.StringWriter(512)));
-        System.out.println("chr: " + write(new java.io.CharArrayWriter(512)));
-        System.out.println("new: " + write(new net.darkslave.io.StringWriter(512)));
+        System.out.println("std:str: " + write(new java.io.StringWriter(512)));
+        System.out.println("new:str: " + write(new net.darkslave.io.StringWriter(512)));
 
+        System.out.println("std:chr: " + write(new java.io.CharArrayWriter(512)));
+        System.out.println("new:chr: " + write(new net.darkslave.io.CharArrayWriter(512)));
+
+
+        System.out.println("----------------------------------------------------");
 
         int TOTAL_SIZE = 16000;
         String LINE = Misc.repeat("*", 16);
@@ -66,23 +70,8 @@ public class PerfWriter {
                 }
             }
             origin = time = System.nanoTime() - time;
-            System.out.printf("%02d std ~ %5.2f ms.%n", ROUND, time * 1e-6);
+            System.out.printf("%02d std:str ~ %5.2f ms.%n", ROUND, time * 1e-6);
             //---------------------------------------------
-
-
-            //---------------------------------------------
-            time = System.nanoTime();
-            for (int i = 0; i < REPEAT; i++) {
-                Writer wr = new java.io.CharArrayWriter(512);
-                for (int j = 0; j < SIZE; j++) {
-                    wr.write(LINE);
-                }
-            }
-            time = System.nanoTime() - time;
-            System.out.printf("%02d chr ~ %5.2f ms. (%+3.0f%%)%n", ROUND, time * 1e-6, (100.0 * (time - origin) / origin));
-            //---------------------------------------------
-
-
 
             //---------------------------------------------
             time = System.nanoTime();
@@ -93,8 +82,41 @@ public class PerfWriter {
                 }
             }
             time = System.nanoTime() - time;
-            System.out.printf("%02d new ~ %5.2f ms. (%+3.0f%%)%n", ROUND, time * 1e-6, (100.0 * (time - origin) / origin));
+            System.out.printf("%02d new:str ~ %5.2f ms. (%+3.0f%%)%n", ROUND, time * 1e-6, (100.0 * (time - origin) / origin));
             //---------------------------------------------
+
+        }
+
+
+        System.out.println("----------------------------------------------------");
+
+        for (int ROUND = 1; ROUND <= 5; ROUND++) {
+            long origin;
+
+            //---------------------------------------------
+            time = System.nanoTime();
+            for (int i = 0; i < REPEAT; i++) {
+                Writer wr = new java.io.CharArrayWriter(512);
+                for (int j = 0; j < SIZE; j++) {
+                    wr.write(LINE);
+                }
+            }
+            origin = time = System.nanoTime() - time;
+            System.out.printf("%02d std:chr ~ %5.2f ms.%n", ROUND, time * 1e-6);
+            //---------------------------------------------
+
+            //---------------------------------------------
+            time = System.nanoTime();
+            for (int i = 0; i < REPEAT; i++) {
+                Writer wr = new net.darkslave.io.CharArrayWriter(512);
+                for (int j = 0; j < SIZE; j++) {
+                    wr.write(LINE);
+                }
+            }
+            time = System.nanoTime() - time;
+            System.out.printf("%02d new:chr ~ %5.2f ms. (%+3.0f%%)%n", ROUND, time * 1e-6, (100.0 * (time - origin) / origin));
+            //---------------------------------------------
+
 
         }
 
