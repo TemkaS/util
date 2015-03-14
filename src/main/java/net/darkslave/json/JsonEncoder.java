@@ -404,89 +404,92 @@ public class JsonEncoder {
             return cached;
 
         try {
-            final Encoder result = getEncoder0(clazz);
-            Encoders.put(clazz, result);
+            final Encoder result = createEncoder(clazz);
 
+            Encoders.put(clazz, result);
             return result;
 
         } catch (ReflectiveOperationException e) {
-            throw new JsonException("Get encoder " + clazz + " error", e);
+            throw new JsonException("Create " + clazz + " encoder error", e);
         }
     }
 
 
-    private static Encoder getEncoder0(Class<?> clazz) throws ReflectiveOperationException {
-        final Class<?> origin = clazz;
+    private static Encoder createEncoder(Class<?> clazz) throws ReflectiveOperationException {
+        JsonSerialize anno = clazz.getAnnotation(JsonSerialize.class);
         String targetName;
 
-        while (clazz != null) {
-            JsonSerialize anno = clazz.getAnnotation(JsonSerialize.class);
-
-            if (anno == null) {
-                clazz = clazz.getSuperclass();
-                continue;
-            }
+        // если не указана аннотация, используем дефолтовый сериализатор
+        if (anno == null)
+            return createDefaultEncoder(clazz);
 
 
-            // указан метод замены целевого объекта сериализации
-            if (!isEmpty(targetName = anno.replaceWith())) {
+        // указан метод замены целевого объекта сериализации, используем его
+        if (!isEmpty(targetName = anno.replaceWith())) {
+            Method target = Reflect.getMethod(clazz, targetName);
+
+            if (target == null)
+                throw new NoSuchMethodException(targetName + " in " + clazz);
+
+            return new ReplaceEncoder(Property.create(target));
+        }
+
+
+        JsonProperty[] properties = anno.value();
+
+        if (isEmpty(properties))
+            throw new ReflectiveOperationException("JsonProperty list is not defined");
+
+
+        // если указаны поля и методы сериализации
+        Map<String, Property> result = new LinkedHashMap<String, Property>();
+
+        for (JsonProperty prop : properties) {
+            String name = prop.value();
+
+
+            // указан метод для сериализации свойства
+            if (!isEmpty(targetName = prop.method())) {
                 Method target = Reflect.getMethod(clazz, targetName);
 
                 if (target == null)
                     throw new NoSuchMethodException(targetName + " in " + clazz);
 
-                return new ReplaceEncoder(Property.create(target));
+                if (isEmpty(name))
+                    name = targetName;
+
+                result.put(name, Property.create(target));
+                continue;
             }
 
 
-            // указаны поля и методы сериализации
-            JsonProperty[] properties = anno.value();
+            // указано поле для сериализации свойства
+            if (!isEmpty(targetName = prop.field()) || !isEmpty(targetName = name)) {
+                Field target = Reflect.getField(clazz, targetName);
 
-            if (isEmpty(properties))
-                throw new ReflectiveOperationException("JsonProperty list is not defined");
+                if (target == null)
+                    throw new NoSuchFieldException(targetName + " in " + clazz);
 
-            Map<String, Property> result = new LinkedHashMap<String, Property>();
+                if (isEmpty(name))
+                    name = targetName;
 
-            for (JsonProperty prop : properties) {
-                String name = prop.value();
-
-                // указан метод для сериализации свойства
-                if (!isEmpty(targetName = prop.method())) {
-                    Method target = Reflect.getMethod(clazz, targetName);
-
-                    if (target == null)
-                        throw new NoSuchMethodException(targetName + " in " + clazz);
-
-                    if (isEmpty(name))
-                        name = targetName;
-
-                    result.put(name, Property.create(target));
-                    continue;
-                }
-
-                // указано поле для сериализации свойства
-                if (!isEmpty(targetName = prop.field()) || !isEmpty(targetName = name)) {
-                    Field target = Reflect.getField(clazz, targetName);
-
-                    if (target == null)
-                        throw new NoSuchFieldException(targetName + " in " + clazz);
-
-                    if (isEmpty(name))
-                        name = targetName;
-
-                    result.put(name, Property.create(target));
-                    continue;
-                }
-
+                result.put(name, Property.create(target));
+                continue;
             }
 
-            return new PropertyEncoder(result);
         }
 
-        // если ничего не указано, сериализуем все поля объекта
+
+        return new PropertyEncoder(result);
+    }
+
+
+    private static Encoder createDefaultEncoder(Class<?> clazz) throws ReflectiveOperationException {
+        // сериализуем все поля объекта
         Map<String, Property> result = new HashMap<String, Property>();
 
-        for (Map.Entry<String, Field> e : Reflect.getFields(origin).entrySet()) {
+
+        for (Map.Entry<String, Field> e : Reflect.getFields(clazz).entrySet()) {
             Field field = e.getValue();
 
             // игнорируем статик поля
@@ -504,6 +507,7 @@ public class JsonEncoder {
 
             result.put(e.getKey(), Property.create(field));
         }
+
 
         return new PropertyEncoder(result);
     }
