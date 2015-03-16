@@ -52,6 +52,22 @@ public class TestJson {
 
     }
 
+    /**
+     * Аннотации наследуются от суперкласса
+     */
+    protected static class B2 extends B {
+    }
+
+
+    /**
+     * Аннотации переопределяют аннотации суперкласса
+     */
+    @JsonSerialize({
+        @JsonProperty("bb")
+    })
+    protected static class B3 extends B {
+    }
+
 
 
     /**
@@ -93,6 +109,8 @@ public class TestJson {
         Object[][] test = {
                 { "class.A",  new A() },
                 { "class.B",  new B() },
+                { "class.B2", new B2() },
+                { "class.B3", new B3() },
                 { "class.C",  new C() },
                 { "class.E",  E.Beer  },
                 { "boolean",  false },
