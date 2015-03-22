@@ -11,13 +11,12 @@ public class TestTestExecutor {
 
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         System.out.println("warmup 10");
         System.out.println( TestExecutor.measure(TestTestExecutor::test1, 10, 10) );
         System.out.println( TestExecutor.measure(TestTestExecutor::test2, 10, 10) );
         System.out.println( TestExecutor.measure(TestTestExecutor::test3, 10, 10) );
         System.out.println();
-
 
         System.out.println("warmup 100");
         System.out.println( TestExecutor.measure(TestTestExecutor::test1, 100, 10) );

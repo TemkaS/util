@@ -9,7 +9,7 @@ public class TestExecutor {
     private TestExecutor() {}
 
 
-    public static Result measure(Runnable target, int warming, int measure) {
+    public static Result measure(Target target, int warming, int measure) throws Exception {
         if (target == null)
             throw new IllegalArgumentException("Target method can't be null");
 
@@ -57,6 +57,13 @@ public class TestExecutor {
         double timeStd = Math.sqrt(summStd / measure - timeAvg * timeAvg);
 
         return new Result(timeAvg, timeMin, timeMax, timeStd);
+    }
+
+
+
+    @FunctionalInterface
+    public static interface Target {
+        void run() throws Exception;
     }
 
 

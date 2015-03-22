@@ -93,8 +93,20 @@ public class TestJson {
     /**
      * Простая сериализация енумов через имя
      */
-    @JsonSerialize(replaceWith = "name")
     protected static enum E {
+        Beer,
+        Wine;
+    }
+
+
+    /**
+     * Сериализация енумов через имя
+     */
+    @JsonSerialize({
+        @JsonProperty("name"),
+        @JsonProperty("ordinal")
+    })
+    protected static enum F {
         Beer,
         Wine;
     }
@@ -113,6 +125,7 @@ public class TestJson {
                 { "class.B3", new B3() },
                 { "class.C",  new C() },
                 { "class.E",  E.Beer  },
+                { "class.F",  F.Beer  },
                 { "boolean",  false },
                 { "number",   123.45 },
                 { "string",   "abcdef" },

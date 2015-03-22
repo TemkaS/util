@@ -12,11 +12,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import net.darkslave.io.CharArrayWriter;
 import net.darkslave.reflect.Property;
@@ -323,22 +323,22 @@ public class JsonEncoder {
     }
 
 
-    private void encodeProperty(Map<String, Property> properties, Object value, int level) throws IOException {
+    private void encodeProperty(Iterable<Property> properties, Object value, int level) throws IOException {
         int index = 0;
 
         write(MAPS_BEG);
 
-        for (Map.Entry<String, Property> entry : properties.entrySet()) {
+        for (Property prop : properties) {
             if (index > 0)
                 write(ITEMS_SEP);
 
-            writeEscaped(entry.getKey());
+            writeEscaped(prop.getName());
             write(ENTRY_SEP);
 
             Object result;
 
             try {
-                result = entry.getValue().get(value);
+                result = prop.get(value);
             } catch (ReflectiveOperationException re) {
                 throw new JsonException("Encode " + value.getClass() + " error", re);
             }
@@ -364,9 +364,7 @@ public class JsonEncoder {
         private final Property delegate;
 
         public ReplaceEncoder(Property delegate) {
-            if (delegate == null)
-                throw new IllegalArgumentException("Parameter can't be null");
-            this.delegate = delegate;
+            this.delegate = Objects.requireNonNull(delegate, "Parameter can't be null");
         }
 
         @Override
@@ -378,12 +376,10 @@ public class JsonEncoder {
 
 
     private static class PropertyEncoder implements Encoder {
-        private final Map<String, Property> properties;
+        private final Iterable<Property> properties;
 
-        public PropertyEncoder(Map<String, Property> properties) {
-            if (properties == null)
-                throw new IllegalArgumentException("Parameter can't be null");
-            this.properties = properties;
+        public PropertyEncoder(Iterable<Property> properties) {
+            this.properties = Objects.requireNonNull(properties, "Parameter can't be null");
         }
 
         @Override
@@ -399,84 +395,53 @@ public class JsonEncoder {
 
     private static Encoder getEncoder(Class<?> clazz) throws JsonException {
         final Encoder cached = Encoders.get(clazz);
+        final Encoder result;
 
         if (cached != null)
             return cached;
 
         try {
-            final Encoder result = createEncoder(clazz);
-
-            Encoders.put(clazz, result);
-            return result;
-
+            result = createEncoder(clazz);
         } catch (ReflectiveOperationException e) {
             throw new JsonException("Create " + clazz + " encoder error", e);
         }
+
+        Encoders.put(clazz, result);
+        return result;
     }
 
 
     private static Encoder createEncoder(Class<?> clazz) throws ReflectiveOperationException {
-        JsonSerialize anno = clazz.getAnnotation(JsonSerialize.class);
+        JsonSerialize annotate = clazz.getAnnotation(JsonSerialize.class);
         String targetName;
 
-        // если не указана аннотация, используем дефолтовый сериализатор
-        if (anno == null)
+
+        // если не указана аннотация сериализации
+        if (annotate == null) {
+            // для енумов используем метод замены объекта name()
+            if (clazz.isEnum())
+                return createReplaceEncoder(clazz, "name");
+
+            // для остальных классов испольузем сериализацию полей
             return createDefaultEncoder(clazz);
-
-
-        // указан метод замены целевого объекта сериализации, используем его
-        if (!isEmpty(targetName = anno.replaceWith())) {
-            Method target = Reflect.getMethod(clazz, targetName);
-
-            if (target == null)
-                throw new NoSuchMethodException(targetName + " in " + clazz);
-
-            return new ReplaceEncoder(Property.create(target));
         }
 
 
-        JsonProperty[] properties = anno.value();
+        // если в аннотации указан метод замены объекта
+        if (!isEmpty(targetName = annotate.replaceWith()))
+            return createReplaceEncoder(clazz, targetName);
 
-        if (isEmpty(properties))
+
+        JsonProperty[] property = annotate.value();
+
+        if (isEmpty(property))
             throw new ReflectiveOperationException("JsonProperty list is not defined");
 
-
         // если указаны поля и методы сериализации
-        Map<String, Property> result = new LinkedHashMap<String, Property>();
+        Collection<Property> result = new ArrayList<Property>(property.length);
 
-        for (JsonProperty prop : properties) {
-            String name = prop.value();
-
-
-            // указан метод для сериализации свойства
-            if (!isEmpty(targetName = prop.method())) {
-                Method target = Reflect.getMethod(clazz, targetName);
-
-                if (target == null)
-                    throw new NoSuchMethodException(targetName + " in " + clazz);
-
-                if (isEmpty(name))
-                    name = targetName;
-
-                result.put(name, Property.create(target));
-                continue;
-            }
-
-
-            // указано поле для сериализации свойства
-            if (!isEmpty(targetName = prop.field()) || !isEmpty(targetName = name)) {
-                Field target = Reflect.getField(clazz, targetName);
-
-                if (target == null)
-                    throw new NoSuchFieldException(targetName + " in " + clazz);
-
-                if (isEmpty(name))
-                    name = targetName;
-
-                result.put(name, Property.create(target));
-                continue;
-            }
-
+        for (JsonProperty prop : property) {
+            result.add(createProperty(clazz, prop.value(), prop.field(), prop.method()));
         }
 
 
@@ -485,11 +450,10 @@ public class JsonEncoder {
 
 
     private static Encoder createDefaultEncoder(Class<?> clazz) throws ReflectiveOperationException {
-        // сериализуем все поля объекта
-        Map<String, Property> result = new HashMap<String, Property>();
+        Map<String, Field>   fields = Reflect.getFields(clazz);
+        Collection<Property> result = new ArrayList<Property>(fields.size());
 
-
-        for (Map.Entry<String, Field> e : Reflect.getFields(clazz).entrySet()) {
+        for (Map.Entry<String, Field> e : fields.entrySet()) {
             Field field = e.getValue();
 
             // игнорируем статик поля
@@ -505,11 +469,55 @@ public class JsonEncoder {
             if (ignore != null)
                 continue;
 
-            result.put(e.getKey(), Property.create(field));
+            result.add(Property.create(e.getKey(), field));
+        }
+
+        return new PropertyEncoder(result);
+    }
+
+
+    private static Encoder createReplaceEncoder(Class<?> clazz, String name) throws ReflectiveOperationException {
+        Method target = Reflect.getMethod(clazz, name);
+
+        if (target == null)
+            throw new NoSuchMethodException(name + " in " + clazz);
+
+        return new ReplaceEncoder(Property.create(name, target));
+    }
+
+
+    private static Property createProperty(Class<?> clazz, String outputName, String fieldName, String methodName) throws ReflectiveOperationException {
+        String name;
+
+        // указан метод для сериализации свойства
+        if (!isEmpty(name = methodName)) {
+            Method target = Reflect.getMethod(clazz, name);
+
+            if (target == null)
+                throw new NoSuchMethodException(name + " in " + clazz);
+
+            if (isEmpty(outputName))
+                outputName = name;
+
+            return Property.create(outputName, target);
         }
 
 
-        return new PropertyEncoder(result);
+        // указано поле для сериализации свойства
+        if (!isEmpty(name = fieldName) || !isEmpty(name = outputName)) {
+            Field target = Reflect.getField(clazz, name);
+
+            if (target == null)
+                throw new NoSuchFieldException(name + " in " + clazz);
+
+            if (isEmpty(outputName))
+                outputName = name;
+
+            return Property.create(outputName, target);
+        }
+
+
+        throw new IllegalArgumentException("Neither Field nor Method name are defined");
     }
 
 

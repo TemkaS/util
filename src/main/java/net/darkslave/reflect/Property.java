@@ -4,8 +4,10 @@
  */
 package net.darkslave.reflect;
 
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 
 
@@ -14,33 +16,48 @@ import java.lang.reflect.Method;
 public abstract class Property {
 
 
-    public static Property create(Field delegate) {
-        return new FieldProperty(delegate);
+    public static Property create(String name, Field delegate) {
+        return new FieldProperty(name, delegate);
     }
 
 
-    public static Property create(Method delegate) {
-        return new MethodProperty(delegate);
+    public static Property create(String name, Method delegate) {
+        return new MethodProperty(name, delegate);
     }
 
 
-    private Property() {}
+    /***********************************************************************************************
+     */
+    private final String name;
 
 
-    abstract public Object get(Object target, Object... args) throws ReflectiveOperationException;
+    private Property(String name) {
+        this.name = name;
+    }
 
 
+    public String getName() {
+        return name;
+    }
+
+
+    public abstract Object get(Object target, Object ... args) throws ReflectiveOperationException;
+
+
+    /***********************************************************************************************
+     */
     private static class FieldProperty extends Property {
         private final Field delegate;
 
-        public FieldProperty(Field delegate) {
-            if (delegate == null)
-                throw new IllegalArgumentException("Parameter can't be null");
-            this.delegate = delegate;
+
+        public FieldProperty(String name, Field delegate) {
+            super(name);
+            this.delegate = Objects.requireNonNull(delegate, "Parameter can't be null");
         }
 
+
         @Override
-        public Object get(Object target, Object... args) throws ReflectiveOperationException {
+        public Object get(Object target, Object ... args) throws ReflectiveOperationException {
             delegate.setAccessible(true);
             return delegate.get(target);
         }
@@ -48,17 +65,20 @@ public abstract class Property {
     }
 
 
+    /***********************************************************************************************
+     */
     private static class MethodProperty extends Property {
         private final Method delegate;
 
-        public MethodProperty(Method delegate) {
-            if (delegate == null)
-                throw new IllegalArgumentException("Parameter can't be null");
-            this.delegate = delegate;
+
+        public MethodProperty(String name, Method delegate) {
+            super(name);
+            this.delegate = Objects.requireNonNull(delegate, "Parameter can't be null");
         }
 
+
         @Override
-        public Object get(Object target, Object... args) throws ReflectiveOperationException {
+        public Object get(Object target, Object ... args) throws ReflectiveOperationException {
             delegate.setAccessible(true);
             return delegate.invoke(target, args);
         }
