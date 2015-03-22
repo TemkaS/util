@@ -230,10 +230,10 @@ public class JsonEncoder {
         // проверка рекурсии
         dejavu(value, level);
 
-        Class<?> clazz = value.getClass();
+        Class<?> targetClass = value.getClass();
 
         // массив
-        if (clazz.isArray()) {
+        if (targetClass.isArray()) {
             writeArray(value, level);
             return;
         }
@@ -251,7 +251,7 @@ public class JsonEncoder {
         }
 
         // прочие объекты
-        JsonObjectEncoder encoder = getEncoder(clazz);
+        JsonObjectEncoder encoder = getEncoder(targetClass);
         encoder.encode(this, value, level);
     }
 
@@ -367,11 +367,11 @@ public class JsonEncoder {
     /**
      * Установить кастомный сериализатор класса
      *
+     * @param targetClass - целевой класс
      * @param encoder - сериализатор
-     * @throws JsonException
      */
-    public static void setEncoder(JsonObjectEncoder encoder) throws JsonException {
-        Encoders.put(encoder.targetClass(), encoder);
+    public static void setEncoder(Class<?> targetClass, JsonObjectEncoder encoder) {
+        Encoders.put(targetClass, encoder);
     }
 
 
@@ -463,7 +463,7 @@ public class JsonEncoder {
             result.add(Property.from(e.getKey(), field));
         }
 
-        return new JsonPropertyEncoder(targetClass, result);
+        return new JsonPropertyEncoder(result);
     }
 
 

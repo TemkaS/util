@@ -17,12 +17,11 @@ import net.darkslave.reflect.Reflect;
 /**
  * Сериализатор замены текущего объекта сериализации
  */
-public class JsonReplaceEncoder extends JsonObjectEncoder {
+public class JsonReplaceEncoder implements JsonObjectEncoder {
     private final Property delegate;
 
 
-    public JsonReplaceEncoder(Class<?> targetClass, Property delegate) {
-        super(targetClass);
+    public JsonReplaceEncoder(Property delegate) {
         this.delegate = delegate;
     }
 
@@ -50,7 +49,7 @@ public class JsonReplaceEncoder extends JsonObjectEncoder {
         if (target == null)
             throw new NoSuchMethodException(name + " in " + targetClass);
 
-        return new JsonReplaceEncoder(targetClass, Property.from(name, target));
+        return new JsonReplaceEncoder(Property.from(name, target));
     }
 
 }

@@ -21,12 +21,11 @@ import net.darkslave.util.Misc;
 /**
  * Сериализатор полей и методов объекта
  */
-public class JsonPropertyEncoder extends JsonObjectEncoder {
+public class JsonPropertyEncoder implements JsonObjectEncoder {
     private final Iterable<Property> properties;
 
 
-    public JsonPropertyEncoder(Class<?> targetClass, Iterable<Property> properties) {
-        super(targetClass);
+    public JsonPropertyEncoder(Iterable<Property> properties) {
         this.properties = properties;
     }
 
@@ -70,7 +69,7 @@ public class JsonPropertyEncoder extends JsonObjectEncoder {
             result.add(newProperty(targetClass, JsonPropertyData.from(prop)));
         }
 
-        return new JsonPropertyEncoder(targetClass, result);
+        return new JsonPropertyEncoder(result);
     }
 
 
@@ -84,7 +83,7 @@ public class JsonPropertyEncoder extends JsonObjectEncoder {
             result.add(newProperty(targetClass, prop));
         }
 
-        return new JsonPropertyEncoder(targetClass, result);
+        return new JsonPropertyEncoder(result);
     }
 
 

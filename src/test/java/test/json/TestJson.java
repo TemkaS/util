@@ -1,6 +1,7 @@
 package test.json;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
 import net.darkslave.json.*;
@@ -90,6 +91,9 @@ public class TestJson {
     }
 
 
+    /**
+     * Тест класс для кастомной сериализации
+     */
     protected static class D {
         protected String aa = "abcdef";
         protected double bb = 123.45;
@@ -100,6 +104,9 @@ public class TestJson {
 
     }
 
+
+    protected static class D2 extends D {
+    }
 
 
     /**
@@ -129,12 +136,19 @@ public class TestJson {
         Throwable error = new Exception("The main exception", new Exception("Cause exception"));
         error.addSuppressed(new Exception("Suppressed exception"));
 
-        JsonEncoder.setEncoder(JsonPropertyEncoder.create(D.class, Arrays.asList(
+
+        Collection<JsonPropertyData> props =  Arrays.asList(
                 JsonPropertyData.forField("aa"),
                 JsonPropertyData.forField("aa", "bb"),
                 JsonPropertyData.forMethod("yy"),
                 JsonPropertyData.forMethod("yy", "zz")
-        )));
+        );
+
+        JsonEncoder.setEncoder(D.class, JsonPropertyEncoder.create(D.class, props));
+
+        JsonEncoder.setEncoder(D2.class, (e, o, l) -> {
+            e.write("* custom serialization here *");
+        });
 
 
         Object[][] test = {
@@ -144,6 +158,7 @@ public class TestJson {
                 { "class.B3", new B3() },
                 { "class.C",  new C() },
                 { "class.D",  new D() },
+                { "class.D2", new D2() },
                 { "class.E",  E.Beer  },
                 { "class.F",  F.Beer  },
                 { "boolean",  false },
