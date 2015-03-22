@@ -7,27 +7,52 @@ package net.darkslave.reflect;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Objects;
 
 
 
 
-
+/**
+ * Обертка над полями и методами класса
+ */
 public abstract class Property {
 
 
-    public static Property create(String name, Field delegate) {
+    /**
+     * Создать свойство по полю класса
+     */
+    public static Property from(Field delegate) {
+        return new FieldProperty(delegate);
+    }
+
+
+    /**
+     * Создать свойство по имени и полю класса
+     */
+    public static Property from(String name, Field delegate) {
         return new FieldProperty(name, delegate);
     }
 
 
-    public static Property create(String name, Method delegate) {
+    /**
+     * Создать свойство по методу класса
+     */
+    public static Property from(Method delegate) {
+        return new MethodProperty(delegate);
+    }
+
+
+    /**
+     * Создать свойство по имени и методу класса
+     */
+    public static Property from(String name, Method delegate) {
         return new MethodProperty(name, delegate);
     }
 
 
+
     /***********************************************************************************************
      */
+
     private final String name;
 
 
@@ -44,15 +69,23 @@ public abstract class Property {
     public abstract Object get(Object target, Object ... args) throws ReflectiveOperationException;
 
 
+
     /***********************************************************************************************
      */
+
     private static class FieldProperty extends Property {
         private final Field delegate;
 
 
+        public FieldProperty(Field delegate) {
+            super(delegate.getName());
+            this.delegate = delegate;
+        }
+
+
         public FieldProperty(String name, Field delegate) {
             super(name);
-            this.delegate = Objects.requireNonNull(delegate, "Parameter can't be null");
+            this.delegate = delegate;
         }
 
 
@@ -65,15 +98,23 @@ public abstract class Property {
     }
 
 
+
     /***********************************************************************************************
      */
+
     private static class MethodProperty extends Property {
         private final Method delegate;
 
 
+        public MethodProperty(Method delegate) {
+            super(delegate.getName());
+            this.delegate = delegate;
+        }
+
+
         public MethodProperty(String name, Method delegate) {
             super(name);
-            this.delegate = Objects.requireNonNull(delegate, "Parameter can't be null");
+            this.delegate = delegate;
         }
 
 

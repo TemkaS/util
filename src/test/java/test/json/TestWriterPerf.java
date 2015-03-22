@@ -16,7 +16,7 @@ public class TestWriterPerf {
 
 
     public static void main(String[] args) throws Exception {
-        source = Misc.repeat("*", 16);
+        source = Misc.repeat("*", 128);
 
         System.out.println("std.str: " + TestExecutor.measure(TestWriterPerf::testStdStr, 10, 10) );
         System.out.println("new.str: " + TestExecutor.measure(TestWriterPerf::testNewStr, 10, 10) );
@@ -32,14 +32,15 @@ public class TestWriterPerf {
         for (int i = 0; i < repeat; i++) {
             wr.write(source);
         }
+        result = wr;
     }
 
-    @SuppressWarnings("resource")
     private static void testNewStr() throws IOException {
         Writer wr = new net.darkslave.io.StringWriter(512);
         for (int i = 0; i < repeat; i++) {
             wr.write(source);
         }
+        result = wr;
     }
 
 
@@ -48,14 +49,15 @@ public class TestWriterPerf {
         for (int i = 0; i < repeat; i++) {
             wr.write(source);
         }
+        result = wr;
     }
 
-    @SuppressWarnings("resource")
     private static void testNewChr() throws IOException {
         Writer wr = new net.darkslave.io.CharArrayWriter(512);
         for (int i = 0; i < repeat; i++) {
             wr.write(source);
         }
+        result = wr;
     }
 
 

@@ -90,6 +90,18 @@ public class TestJson {
     }
 
 
+    protected static class D {
+        protected String aa = "abcdef";
+        protected double bb = 123.45;
+
+        protected boolean yy() {
+            return true;
+        }
+
+    }
+
+
+
     /**
      * Простая сериализация енумов через имя
      */
@@ -117,6 +129,13 @@ public class TestJson {
         Throwable error = new Exception("The main exception", new Exception("Cause exception"));
         error.addSuppressed(new Exception("Suppressed exception"));
 
+        JsonEncoder.setEncoder(JsonPropertyEncoder.create(D.class, Arrays.asList(
+                JsonPropertyData.forField("aa"),
+                JsonPropertyData.forField("aa", "bb"),
+                JsonPropertyData.forMethod("yy"),
+                JsonPropertyData.forMethod("yy", "zz")
+        )));
+
 
         Object[][] test = {
                 { "class.A",  new A() },
@@ -124,6 +143,7 @@ public class TestJson {
                 { "class.B2", new B2() },
                 { "class.B3", new B3() },
                 { "class.C",  new C() },
+                { "class.D",  new D() },
                 { "class.E",  E.Beer  },
                 { "class.F",  F.Beer  },
                 { "boolean",  false },
