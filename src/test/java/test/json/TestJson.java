@@ -144,9 +144,9 @@ public class TestJson {
                 PropertyData.forMethod("yy", "zz")
         );
 
-        JsonEncoder.setEncoder(D.class, PropertyEncoder.create(D.class, props));
+        JsonEncoder.setObjectEncoder(D.class, PropertyEncoder.create(D.class, props));
 
-        JsonEncoder.setEncoder(D2.class, (e, o, l) -> {
+        JsonEncoder.setObjectEncoder(D2.class, (e, o, l) -> {
             e.write("* custom serialization here *");
         });
 

@@ -251,7 +251,7 @@ public class JsonEncoder {
         }
 
         // прочие объекты
-        ObjectEncoder encoder = getEncoder(targetClass);
+        ObjectEncoder encoder = getObjectEncoder(targetClass);
         encoder.encode(this, value, level);
     }
 
@@ -360,7 +360,7 @@ public class JsonEncoder {
 
     /**********************************************************************************************
     */
-    private static final Map<Class<?>, ObjectEncoder> Encoders = new ConcurrentHashMap<Class<?>, ObjectEncoder>();
+    private static final Map<Class<?>, ObjectEncoder> encoders = new ConcurrentHashMap<Class<?>, ObjectEncoder>();
 
 
 
@@ -370,8 +370,8 @@ public class JsonEncoder {
      * @param targetClass - целевой класс
      * @param encoder - сериализатор
      */
-    public static void setEncoder(Class<?> targetClass, ObjectEncoder encoder) {
-        Encoders.put(targetClass, encoder);
+    public static void setObjectEncoder(Class<?> targetClass, ObjectEncoder encoder) {
+        encoders.put(targetClass, encoder);
     }
 
 
@@ -383,8 +383,8 @@ public class JsonEncoder {
      * @return сериализатор
      * @throws JsonException
      */
-    public static ObjectEncoder getEncoder(Class<?> targetClass) throws JsonException {
-        final ObjectEncoder cached = Encoders.get(targetClass);
+    public static ObjectEncoder getObjectEncoder(Class<?> targetClass) throws JsonException {
+        final ObjectEncoder cached = encoders.get(targetClass);
         final ObjectEncoder result;
 
         if (cached != null)
@@ -396,7 +396,7 @@ public class JsonEncoder {
             throw new JsonException("Create " + targetClass + " encoder error", e);
         }
 
-        Encoders.put(targetClass, result);
+        encoders.put(targetClass, result);
         return result;
     }
 
