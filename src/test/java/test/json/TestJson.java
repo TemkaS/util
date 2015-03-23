@@ -137,14 +137,14 @@ public class TestJson {
         error.addSuppressed(new Exception("Suppressed exception"));
 
 
-        Collection<JsonPropertyData> props =  Arrays.asList(
-                JsonPropertyData.forField("aa"),
-                JsonPropertyData.forField("aa", "bb"),
-                JsonPropertyData.forMethod("yy"),
-                JsonPropertyData.forMethod("yy", "zz")
+        Collection<PropertyData> props =  Arrays.asList(
+                PropertyData.forField("aa"),
+                PropertyData.forField("aa", "bb"),
+                PropertyData.forMethod("yy"),
+                PropertyData.forMethod("yy", "zz")
         );
 
-        JsonEncoder.setEncoder(D.class, JsonPropertyEncoder.create(D.class, props));
+        JsonEncoder.setEncoder(D.class, PropertyEncoder.create(D.class, props));
 
         JsonEncoder.setEncoder(D2.class, (e, o, l) -> {
             e.write("* custom serialization here *");

@@ -10,14 +10,14 @@ package net.darkslave.json;
 /**
  * Mock объект для аннотаций JsonProperty
  */
-public abstract class JsonPropertyData {
+public abstract class PropertyData {
 
     /**
      * Обертка аннотации
      *
      * @param source - аннотация
      */
-    public static JsonPropertyData from(JsonProperty source) {
+    public static PropertyData from(JsonProperty source) {
         return new Annotation(source);
     }
 
@@ -28,7 +28,7 @@ public abstract class JsonPropertyData {
      * @param source - целевое поле
      * @param output - синоним
      */
-    public static JsonPropertyData forField(String source, String output) {
+    public static PropertyData forField(String source, String output) {
         return new Static(output, source, null);
     }
 
@@ -39,7 +39,7 @@ public abstract class JsonPropertyData {
      * @param source - целевое поле
      * @param output - синоним
      */
-    public static JsonPropertyData forField(String source) {
+    public static PropertyData forField(String source) {
         return new Static(source, source, null);
     }
 
@@ -50,7 +50,7 @@ public abstract class JsonPropertyData {
      * @param source - целевой метод
      * @param output - синоним
      */
-    public static JsonPropertyData forMethod(String source, String output) {
+    public static PropertyData forMethod(String source, String output) {
         return new Static(output, null, source);
     }
 
@@ -60,7 +60,7 @@ public abstract class JsonPropertyData {
      *
      * @param source - целевой метод
      */
-    public static JsonPropertyData forMethod(String source) {
+    public static PropertyData forMethod(String source) {
         return new Static(source, null, source);
     }
 
@@ -75,7 +75,7 @@ public abstract class JsonPropertyData {
 
 
 
-    private static class Static extends JsonPropertyData {
+    private static class Static extends PropertyData {
         private final String value;
         private final String field;
         private final String method;
@@ -108,7 +108,7 @@ public abstract class JsonPropertyData {
     }
 
 
-    private static class Annotation extends JsonPropertyData {
+    private static class Annotation extends PropertyData {
         private final JsonProperty source;
 
 

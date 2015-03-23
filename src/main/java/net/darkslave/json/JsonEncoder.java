@@ -251,7 +251,7 @@ public class JsonEncoder {
         }
 
         // прочие объекты
-        JsonObjectEncoder encoder = getEncoder(targetClass);
+        ObjectEncoder encoder = getEncoder(targetClass);
         encoder.encode(this, value, level);
     }
 
@@ -360,7 +360,7 @@ public class JsonEncoder {
 
     /**********************************************************************************************
     */
-    private static final Map<Class<?>, JsonObjectEncoder> Encoders = new ConcurrentHashMap<Class<?>, JsonObjectEncoder>();
+    private static final Map<Class<?>, ObjectEncoder> Encoders = new ConcurrentHashMap<Class<?>, ObjectEncoder>();
 
 
 
@@ -370,7 +370,7 @@ public class JsonEncoder {
      * @param targetClass - целевой класс
      * @param encoder - сериализатор
      */
-    public static void setEncoder(Class<?> targetClass, JsonObjectEncoder encoder) {
+    public static void setEncoder(Class<?> targetClass, ObjectEncoder encoder) {
         Encoders.put(targetClass, encoder);
     }
 
@@ -383,9 +383,9 @@ public class JsonEncoder {
      * @return сериализатор
      * @throws JsonException
      */
-    public static JsonObjectEncoder getEncoder(Class<?> targetClass) throws JsonException {
-        final JsonObjectEncoder cached = Encoders.get(targetClass);
-        final JsonObjectEncoder result;
+    public static ObjectEncoder getEncoder(Class<?> targetClass) throws JsonException {
+        final ObjectEncoder cached = Encoders.get(targetClass);
+        final ObjectEncoder result;
 
         if (cached != null)
             return cached;
@@ -405,14 +405,14 @@ public class JsonEncoder {
     /**
      * Создание сериализатора по аннотации к классу
      */
-    private static JsonObjectEncoder createByAnnotation(Class<?> targetClass) throws ReflectiveOperationException {
+    private static ObjectEncoder createByAnnotation(Class<?> targetClass) throws ReflectiveOperationException {
         JsonSerialize annotate = targetClass.getAnnotation(JsonSerialize.class);
 
         // если не указана аннотация сериализации
         if (annotate == null) {
             // для енумов используем метод замены объекта name()
             if (targetClass.isEnum())
-                return JsonReplaceEncoder.create(targetClass, "name");
+                return ReplaceEncoder.create(targetClass, "name");
 
             // для остальных классов испольузем сериализацию полей
             return createDefaultEncoder(targetClass);
@@ -423,7 +423,7 @@ public class JsonEncoder {
         String methodName = annotate.replaceWith();
 
         if (!Misc.isEmpty(methodName))
-            return JsonReplaceEncoder.create(targetClass, methodName);
+            return ReplaceEncoder.create(targetClass, methodName);
 
 
         // если указан список свойств для сериализации
@@ -432,7 +432,7 @@ public class JsonEncoder {
         if (Misc.isEmpty(properties))
             throw new ReflectiveOperationException("JsonProperty list is empty");
 
-        return JsonPropertyEncoder.create(targetClass, properties);
+        return PropertyEncoder.create(targetClass, properties);
     }
 
 
@@ -440,7 +440,7 @@ public class JsonEncoder {
     /**
      * Создание сериализатора по умолчанию (по полям класса)
      */
-    private static JsonObjectEncoder createDefaultEncoder(Class<?> targetClass) throws ReflectiveOperationException {
+    private static ObjectEncoder createDefaultEncoder(Class<?> targetClass) throws ReflectiveOperationException {
         Map<String, Field>   fields = Reflect.getFields(targetClass);
         Collection<Property> result = new ArrayList<Property>(fields.size());
 
@@ -463,7 +463,7 @@ public class JsonEncoder {
             result.add(Property.from(e.getKey(), field));
         }
 
-        return new JsonPropertyEncoder(result);
+        return new PropertyEncoder(result);
     }
 
 

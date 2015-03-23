@@ -12,7 +12,7 @@ import java.io.IOException;
  * Интерфейс кастомного сериализатора
  */
 @FunctionalInterface
-public interface JsonObjectEncoder {
+public interface ObjectEncoder {
 
     public void encode(JsonEncoder encoder, Object value, int level) throws IOException;
 

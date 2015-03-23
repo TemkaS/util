@@ -21,11 +21,11 @@ import net.darkslave.util.Misc;
 /**
  * Сериализатор полей и методов объекта
  */
-public class JsonPropertyEncoder implements JsonObjectEncoder {
+public class PropertyEncoder implements ObjectEncoder {
     private final Iterable<Property> properties;
 
 
-    public JsonPropertyEncoder(Iterable<Property> properties) {
+    public PropertyEncoder(Iterable<Property> properties) {
         this.properties = properties;
     }
 
@@ -62,32 +62,32 @@ public class JsonPropertyEncoder implements JsonObjectEncoder {
     /**
      * Создать новый сериализатор
      */
-    public static JsonObjectEncoder create(Class<?> targetClass, JsonProperty[] source) throws ReflectiveOperationException {
+    public static ObjectEncoder create(Class<?> targetClass, JsonProperty[] source) throws ReflectiveOperationException {
         Collection<Property> result = new ArrayList<Property>(source.length);
 
         for (JsonProperty prop : source) {
-            result.add(newProperty(targetClass, JsonPropertyData.from(prop)));
+            result.add(newProperty(targetClass, PropertyData.from(prop)));
         }
 
-        return new JsonPropertyEncoder(result);
+        return new PropertyEncoder(result);
     }
 
 
     /**
      * Создать новый сериализатор
      */
-    public static JsonObjectEncoder create(Class<?> targetClass, Collection<JsonPropertyData> source) throws ReflectiveOperationException {
+    public static ObjectEncoder create(Class<?> targetClass, Collection<PropertyData> source) throws ReflectiveOperationException {
         Collection<Property> result = new ArrayList<Property>(source.size());
 
-        for (JsonPropertyData prop : source) {
+        for (PropertyData prop : source) {
             result.add(newProperty(targetClass, prop));
         }
 
-        return new JsonPropertyEncoder(result);
+        return new PropertyEncoder(result);
     }
 
 
-    private static Property newProperty(Class<?> targetClass, JsonPropertyData source) throws ReflectiveOperationException {
+    private static Property newProperty(Class<?> targetClass, PropertyData source) throws ReflectiveOperationException {
         String outputName = source.value();
         String name;
 
