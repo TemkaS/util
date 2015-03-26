@@ -9,19 +9,11 @@ import java.text.SimpleDateFormat;
 /**
  * Фабрика дейт-форматтеров
  */
+@FunctionalInterface
 public interface DateFormatFactory {
 
-    DateFormatFactory DEFAULT_FACTORY = new DateFormatFactory() {
-
-        @Override
-        public DateFormat get(String format) {
-            return new SimpleDateFormat(format);
-        }
-
-    };
-
+    DateFormatFactory DEFAULT_FACTORY = SimpleDateFormat::new;
 
     DateFormat get(String format);
-
 
 }

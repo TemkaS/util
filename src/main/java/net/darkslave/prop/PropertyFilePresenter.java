@@ -54,8 +54,7 @@ public class PropertyFilePresenter extends AbstractPropertyPresenter implements 
         if (names == null) {
             synchronized (this) {
                 if (names == null) {
-                    final Set<String> temp = properties.stringPropertyNames();
-                    names = temp;
+                    names = properties.stringPropertyNames();
                 }
             }
         }
