@@ -175,12 +175,7 @@ public class SSLFactory {
     /**
      * Менеджер проверки хостов по умолчанию
      */
-    public static final HostnameVerifier DEFAULT_HOST_VERIFIER = new HostnameVerifier() {
-        @Override
-        public boolean verify(String hostname, SSLSession session) {
-            return true;
-        }
-    };
+    public static final HostnameVerifier DEFAULT_HOST_VERIFIER = (hostname, session) -> true;
 
 
     /**

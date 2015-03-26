@@ -170,12 +170,8 @@ public class TestJson {
                 { "list",     Arrays.asList( false, 123.45, "abcdef" ) },
                 { "map",      Arrays.asList( false, 123.45, "abcdef" ).stream()
                     .collect(Collectors.toMap(
-                        (Object val) -> {
-                            return val.getClass().getSimpleName().toLowerCase();
-                        },
-                        (Object val) -> {
-                            return val;
-                        }
+                        (Object val) -> val.getClass().getSimpleName().toLowerCase(),
+                        (Object val) -> val
                     ))
                 },
                 { "date",     new Date() },

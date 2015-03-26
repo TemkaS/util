@@ -37,7 +37,6 @@ public abstract class PropertyData {
      * Обертка для поля
      *
      * @param source - целевое поле
-     * @param output - синоним
      */
     public static PropertyData forField(String source) {
         return new Static(source, source, null);

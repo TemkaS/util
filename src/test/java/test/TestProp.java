@@ -14,7 +14,7 @@ public class TestProp {
 
 
     public static void main(String[] args) throws Exception {
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         map.put("a", "true");
         map.put("b", "123");
         map.put("c", "123.45");

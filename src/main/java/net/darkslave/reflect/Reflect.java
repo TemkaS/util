@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Reflect {
 
-    private static Map<Class<?>, Map<String, Field>> Fields = new ConcurrentHashMap<Class<?>, Map<String, Field>>();
+    private static Map<Class<?>, Map<String, Field>> Fields = new ConcurrentHashMap<>();
 
 
     /**
@@ -43,14 +43,14 @@ public class Reflect {
 
 
     private static Map<String, Field> getFields0(Class<?> clazz) {
-        Deque<Class<?>> deque = new LinkedList<Class<?>>();
+        Deque<Class<?>> deque = new LinkedList<>();
 
         while (clazz != null) {
             deque.offerLast(clazz);
             clazz = clazz.getSuperclass();
         }
 
-        Map<String, Field> result = new HashMap<String, Field>();
+        Map<String, Field> result = new HashMap<>();
 
         while ((clazz = deque.pollLast()) != null) {
             for (Field field : clazz.getDeclaredFields())
@@ -63,7 +63,7 @@ public class Reflect {
 
 
 
-    private static Map<Class<?>, Map<MethodSignature, Method>> Methods = new ConcurrentHashMap<Class<?>, Map<MethodSignature, Method>>();
+    private static Map<Class<?>, Map<MethodSignature, Method>> Methods = new ConcurrentHashMap<>();
 
 
     /**
@@ -87,14 +87,14 @@ public class Reflect {
 
 
     private static Map<MethodSignature, Method> getMethods0(Class<?> clazz) {
-        Deque<Class<?>> deque = new LinkedList<Class<?>>();
+        Deque<Class<?>> deque = new LinkedList<>();
 
         while (clazz != null) {
             deque.offerLast(clazz);
             clazz = clazz.getSuperclass();
         }
 
-        Map<MethodSignature, Method> result = new HashMap<MethodSignature, Method>();
+        Map<MethodSignature, Method> result = new HashMap<>();
 
         while ((clazz = deque.pollLast()) != null) {
             for (Method method : clazz.getDeclaredMethods())

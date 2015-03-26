@@ -87,7 +87,7 @@ public class Html {
         private static final Map<String, Character> entities;
 
         static {
-            entities = new HashMap<String, Character>();
+            entities = new HashMap<>();
             entities.put("nbsp", (char) 160);
             entities.put("iexcl", (char) 161);
             entities.put("cent", (char) 162);

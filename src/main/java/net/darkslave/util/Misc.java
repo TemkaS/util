@@ -139,34 +139,19 @@ public class Misc {
     /**
      * Объект-конвертер в Integer
      */
-    public static final Getter<Number, Integer> GET_INTEGER = new Getter<Number, Integer>() {
-        @Override
-        public Integer get(Number source) {
-            return toInteger(source, null);
-        }
-    };
+    public static final Getter<Number, Integer> GET_INTEGER = source -> toInteger(source, null);
 
 
     /**
      * Объект-конвертер в Long
      */
-    public static final Getter<Number, Long> GET_LONG = new Getter<Number, Long>() {
-        @Override
-        public Long get(Number source) {
-            return toLong(source, null);
-        }
-    };
+    public static final Getter<Number, Long> GET_LONG = source -> toLong(source, null);
 
 
     /**
      * Объект-конвертер в Double
      */
-    public static final Getter<Number, Double> GET_DOUBLE = new Getter<Number, Double>() {
-        @Override
-        public Double get(Number source) {
-            return toDouble(source, null);
-        }
-    };
+    public static final Getter<Number, Double> GET_DOUBLE = source -> toDouble(source, null);
 
 
     /**
@@ -219,7 +204,7 @@ public class Misc {
         if (source instanceof Double)
             return (Double) source;
 
-        return new Double(source.doubleValue());
+        return Double.valueOf(source.doubleValue());
     }
 
 
@@ -336,7 +321,7 @@ public class Misc {
 
 
     public static String join(String sepp, Object ... source) {
-        return join(sepp, new ArrayIterable<Object>(source));
+        return join(sepp, new ArrayIterable<>(source));
     }
 
 
@@ -369,8 +354,10 @@ public class Misc {
     }
 
 
+    //maybe T
+    //public static <T> String joinNotEmpty(String sepp, T... source) {
     public static String joinNotEmpty(String sepp, Object ... source) {
-        return joinNotEmpty(sepp, new ArrayIterable<Object>(source));
+        return joinNotEmpty(sepp, new ArrayIterable<>(source));
     }
 
 
@@ -391,7 +378,7 @@ public class Misc {
         if (parsed.length == 0)
             return Collections.emptyList();
 
-        List<String> result = new ArrayList<String>(parsed.length);
+        List<String> result = new ArrayList<>(parsed.length);
 
         for (String item : parsed)
             if (!isEmpty(item = trim(item)))
@@ -416,7 +403,7 @@ public class Misc {
         if (length == 0)
             return Collections.emptyList();
 
-        List<String> result = new ArrayList<String>((length / size) + 1);
+        List<String> result = new ArrayList<>((length / size) + 1);
         int next = size;
         int prev = 0;
 

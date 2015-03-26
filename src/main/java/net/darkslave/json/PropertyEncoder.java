@@ -63,7 +63,7 @@ public class PropertyEncoder implements ObjectEncoder {
      * Создать новый сериализатор
      */
     public static ObjectEncoder create(Class<?> targetClass, JsonProperty[] source) throws ReflectiveOperationException {
-        Collection<Property> result = new ArrayList<Property>(source.length);
+        Collection<Property> result = new ArrayList<>(source.length);
 
         for (JsonProperty prop : source) {
             result.add(newProperty(targetClass, PropertyData.from(prop)));
@@ -77,7 +77,7 @@ public class PropertyEncoder implements ObjectEncoder {
      * Создать новый сериализатор
      */
     public static ObjectEncoder create(Class<?> targetClass, Collection<PropertyData> source) throws ReflectiveOperationException {
-        Collection<Property> result = new ArrayList<Property>(source.size());
+        Collection<Property> result = new ArrayList<>(source.size());
 
         for (PropertyData prop : source) {
             result.add(newProperty(targetClass, prop));

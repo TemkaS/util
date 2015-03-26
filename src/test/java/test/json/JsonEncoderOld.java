@@ -175,7 +175,7 @@ public class JsonEncoderOld {
 
 
     private JsonEncoderOld(Writer w) {
-        stack  = new ArrayList<Object>();
+        stack  = new ArrayList<>();
         writer = w;
     }
 
@@ -377,7 +377,7 @@ public class JsonEncoderOld {
     private static class JsonMethod {
         private static final String JSON_METHOD_NAME = "toJson";
 
-        private static final Map<Class<?>, JsonMethod> cache = new ConcurrentHashMap<Class<?>, JsonMethod>();
+        private static final Map<Class<?>, JsonMethod> cache = new ConcurrentHashMap<>();
         private static final JsonMethod UNDEFINED = new JsonMethod(null);
 
         private final Method method;

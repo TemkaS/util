@@ -29,14 +29,14 @@ public class ParametrizedPresenter extends AbstractPropertyPresenter implements 
         if (params == null || params.length == 0)
             throw new IllegalArgumentException("Params can't be empty");
 
-        final Map<String, Object> temp = new HashMap<String, Object>();
+        final Map<String, Object> temp = new HashMap<>();
 
         for (Map<?, ?> item : params) {
-            for (Map.Entry<?, ?> e : item.entrySet()) {
-                if (e.getKey() instanceof String) {
-                    temp.put((String) e.getKey(), e.getValue());
-                }
-            }
+            item.entrySet().stream().filter(
+                    e -> e.getKey() instanceof String
+            ).forEach(
+                    e -> temp.put((String) e.getKey(), e.getValue())
+            );
         }
 
         this.source = source;

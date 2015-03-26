@@ -14,7 +14,7 @@ import java.util.concurrent.locks.AbstractQueuedSynchronizer;
  * Контейнер для значений, устанавливаемых другими потоками
  */
 public class FutureHolder<T> implements Holder<T> {
-    private final Sync<T> sync = new Sync<T>();
+    private final Sync<T> sync = new Sync<>();
 
 
     /**

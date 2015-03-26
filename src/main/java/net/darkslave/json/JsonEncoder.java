@@ -157,7 +157,7 @@ public class JsonEncoder {
 
 
     private JsonEncoder(Writer w) {
-        dejavu = new ArrayList<Object>(32);
+        dejavu = new ArrayList<>(32);
         writer = w;
     }
 
@@ -360,7 +360,7 @@ public class JsonEncoder {
 
     /**********************************************************************************************
     */
-    private static final Map<Class<?>, ObjectEncoder> encoders = new ConcurrentHashMap<Class<?>, ObjectEncoder>();
+    private static final Map<Class<?>, ObjectEncoder> encoders = new ConcurrentHashMap<>();
 
 
 
@@ -442,7 +442,7 @@ public class JsonEncoder {
      */
     private static ObjectEncoder createDefaultEncoder(Class<?> targetClass) throws ReflectiveOperationException {
         Map<String, Field>   fields = Reflect.getFields(targetClass);
-        Collection<Property> result = new ArrayList<Property>(fields.size());
+        Collection<Property> result = new ArrayList<>(fields.size());
 
         for (Map.Entry<String, Field> e : fields.entrySet()) {
             Field field = e.getValue();

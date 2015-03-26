@@ -28,7 +28,7 @@ public class ClassScanner {
 
 
     public static Set<String> scan(Class<?> clazz) throws IOException {
-        URL clazzURL = null;
+        URL clazzURL;
 
         CodeSource source = clazz.getProtectionDomain().getCodeSource();
 
@@ -47,7 +47,7 @@ public class ClassScanner {
         path = CLEAR_JAR_NAME1.matcher(path).replaceFirst("");
         path = CLEAR_JAR_NAME2.matcher(path).replaceFirst(".jar");
 
-        Set<String> result = new LinkedHashSet<String>();
+        Set<String> result = new LinkedHashSet<>();
 
         if (path.endsWith(".jar")) {
             try (JarFile file = new JarFile(path)) {

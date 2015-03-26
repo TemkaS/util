@@ -41,7 +41,7 @@ public class Collects {
      * @return результирующую коллекцию
      */
     public static <T, V> List<V> collect(Collection<T> source, Getter<? super T, ? extends V> getter) {
-        return collect(source, getter, new ArrayList<V>(source.size()));
+        return collect(source, getter, new ArrayList<>(source.size()));
     }
 
 
@@ -69,7 +69,7 @@ public class Collects {
      * @return результирующую таблицу
      */
     public static <K, V> Map<K, V> createMap(Collection<V> source, Getter<? super V, ? extends K> getter) {
-        return createMap(source, getter, new LinkedHashMap<K, V>(source.size()));
+        return createMap(source, getter, new LinkedHashMap<>(source.size()));
     }
 
 

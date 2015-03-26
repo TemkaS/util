@@ -45,8 +45,8 @@ public class FutureRender<T> {
         this.consumer = consumer;
         this.producer = producer;
 
-        this.consumerQueue = new LinkedBlockingQueue<FutureHolder<T>>();
-        this.producerQueue = new LinkedBlockingQueue<FutureHolder<T>>();
+        this.consumerQueue = new LinkedBlockingQueue<>();
+        this.producerQueue = new LinkedBlockingQueue<>();
         this.producerCount = count;
         this.producerLimit = limit;
 
@@ -64,7 +64,7 @@ public class FutureRender<T> {
         delay = TimeUnit.SECONDS.toNanos(1) / frequency;
 
         for (int i = 0; i < producerLimit; i++)
-            producerQueue.add(new FutureHolder<T>(creator.create()));
+            producerQueue.add(new FutureHolder<>(creator.create()));
 
         for (int i = 0; i < producerCount; i++)
             pool.execute(new ProducerWorker());

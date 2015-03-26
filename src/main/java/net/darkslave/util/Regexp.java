@@ -20,12 +20,7 @@ public class Regexp {
     private static final String   EMPTY_STRING       = "";
 
 
-    public static Replacer<String> RETURN_FIRST = new Replacer<String>() {
-        @Override
-        public String replace(String[] match) {
-            return match.length > 1 ? match[1] : EMPTY_STRING;
-        }
-    };
+    public static Replacer<String> RETURN_FIRST = match -> match.length > 1 ? match[1] : EMPTY_STRING;
 
 
     public static interface Replacer<T> {
@@ -107,7 +102,7 @@ public class Regexp {
      * @return список списков совпадений
      */
     public static List<String[]> matchAll(CharSequence source, Pattern pattern) {
-        List<String[]> result = new ArrayList<String[]>();
+        List<String[]> result = new ArrayList<>();
         Matcher matcher = pattern.matcher(source);
 
         while (matcher.find())
@@ -131,7 +126,7 @@ public class Regexp {
      * @return список списков совпадений
      */
     public static <T> List<T> matchAll(CharSequence source, Pattern pattern, Replacer<T> replacer) {
-        List<T> result = new ArrayList<T>();
+        List<T> result = new ArrayList<>();
         Matcher matcher = pattern.matcher(source);
 
         while (matcher.find())
@@ -189,7 +184,7 @@ public class Regexp {
 
 
 
-    private static final Map<String, Pattern> cache = new ConcurrentHashMap<String, Pattern>();
+    private static final Map<String, Pattern> cache = new ConcurrentHashMap<>();
 
 
     /**

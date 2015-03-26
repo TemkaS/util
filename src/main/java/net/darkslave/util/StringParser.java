@@ -72,7 +72,7 @@ public abstract class StringParser<T> {
      * @return список результирующих значений
      */
     public static <T> List<T> parse(Iterable<String> source, StringParser<T> parser, T value, boolean notNull) {
-        List<T> result = new ArrayList<T>();
+        List<T> result = new ArrayList<>();
 
         for (String item : source) {
             T parsed = parser.parse(item, value);
